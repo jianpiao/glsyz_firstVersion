@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>管理</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<link rel="stylesheet" href="static/css/mui.min.css">
+	<link rel="stylesheet" href="static/css/color.css">
+	<link rel="stylesheet" type="text/css" href="static/fonts/left/iconfont.css" />
+</head>
+<style>
+	#header {
+		margin-top: 70px;
+		width: 100%;
+		background-color: #ffffff;
+	}
+
+	.iconfont {
+		color: #20b3a4;
+	}
+
+	.header {
+		height: 100px;
+		width: 100%;
+		display: flex;
+		margin-top: 44px;
+		padding: 18px 12px 8px 12px;
+		background-color: #ffffff;
+		overflow-x: auto;
+		overflow-y: hidden;
+		/* box-shadow: 0 1px 1px #dddddd, 0 0 1px #dddddd; */
+	}
+
+	.header div {
+		width: 100%;
+		text-align: center;
+	}
+
+	.icontag {
+		margin: 0 auto;
+		width: 45px !important;
+		height: 45px !important;
+		line-height: 47px !important;
+		/* border-radius: 5px; */
+		/* background-color: #0fad9d; */
+	}
+
+	.describe {
+		font-size: .9rem;
+		color: #666666;
+		line-height: 30px;
+	}
+
+	.content {
+		margin: 12px 0 0 0;
+		background-color: #ffffff;
+	}
+
+	.recomm {
+		position: relative;
+		height: 40px;
+		line-height: 40px;
+		color: #888888;
+		font-size: .96rem;
+	}
+
+	.recomm span:first-child {
+		margin-left: 12px;
+	}
+
+	.recomm span:nth-child(2) {
+		float: right;
+		margin-right: 12px;
+		color: #127D73;
+	}
+
+	.recomm:before {
+		content: '';
+		position: absolute;
+		top: 39px;
+		width: 100%;
+		border-bottom: 1px solid #ccc;
+		-webkit-transform-origin: 0 0;
+		transform-origin: 0 0;
+		-webkit-transform: scaleY(0.3);
+		transform: scaleY(0.3);
+		box-sizing: border-box;
+	}
+
+	.remcomm1 {
+		margin-top: 10px;
+	}
+
+	.comm-diffe {
+		height: inherit;
+	}
+
+	.comm-diffe ul {
+		overflow-x: auto;
+		overflow-y: hidden;
+		display: flex;
+		margin: 0;
+		padding: 0;
+	}
+
+	.comm-diffe ul li {
+		width: 100px;
+		height: 70px;
+		list-style-type: none;
+		margin: 3px;
+		position: relative;
+	}
+
+	.comm-diffe ul li:first-child {
+		margin-left: 0;
+	}
+
+	.comm-name {
+		position: absolute;
+		width: 90px;
+		height: 70px !important;
+		background-color: rgba(0, 0, 0, .6);
+		color: #ffffff;
+		border-radius: 4px;
+		font-weight: 700;
+		font-size: .9rem;
+	}
+
+	.comm-name>center {
+		line-height: 70px;
+		overflow: hidden;
+		display: -webkit-box;
+		display: -moz-box;
+		text-overflow: ellipsis;
+		word-break: break-all;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+	}
+
+	img {
+		width: 90px;
+		height: 70px;
+		border-radius: 4px;
+		-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.1) inset;
+		-moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.1) inset;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0px 0px 2px rgba(0, 0, 0, 0.1) inset;
+	}
+
+	#carousel-picture,
+	#add-comm,
+	#set-goods-info,
+	#set-double-assort {
+		position: relative;
+	}
+
+	.tools::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		width: 100%;
+		border-bottom: 1px solid #ccc;
+		-webkit-transform-origin: 0 0;
+		transform-origin: 0 0;
+		-webkit-transform: scaleY(0.3);
+		transform: scaleY(0.3);
+		box-sizing: border-box;
+	}
+
+	#carousel-picture::before,
+	#add-comm::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 100%;
+		border-left: 1px solid #ccc;
+		-webkit-transform-origin: 0 0;
+		transform-origin: 0 0;
+		-webkit-transform: scaleX(0.3);
+		transform: scaleX(0.3);
+		box-sizing: border-box;
+	}
+
+	#carousel-picture::after,
+	#set-goods-info::after,
+	#set-double-assort::after{
+		content: '';
+		position: absolute;
+		top: 0;
+		right: 0;
+		height: 100%;
+		border-right: 1px solid #ddd;
+		-webkit-transform-origin: 0 0;
+		transform-origin: 0 0;
+		-webkit-transform: scaleX(0.3);
+		transform: scaleX(0.3);
+		box-sizing: border-box;
+	}
+
+	.search {
+		position: fixed;
+		top: 0;
+		z-index: 100;
+		left: 0;
+		height: 70px;
+		width: 100%;
+		color: #fff;
+		text-align: center;
+	}
+
+	.search>span:first-child {
+		font-size: 1rem;
+		line-height: 96px;
+		margin: 0 auto;
+	}
+
+	.icon-fangdajing {
+		position: fixed;
+		top: 37px;
+		right: 14px;
+		color: #fff;
+		font-size: 20px;
+	}
+
+	
+	.icon-qianbao,
+	.icon-tuwenxiangqing {
+		font-size: 38px;
+	}
+
+	.icon-shangpinguanli {
+		font-size: 32px;
+	}
+
+	.icon-tuikuanshouhou,
+	.icon-yuangong,
+	.icon-quanfenleib,
+	.icon-tianjia,
+	.icon-lihuoshangjia,
+	.icon-gengduopintuan {
+		font-size: 39px;
+	}
+
+	.tools,
+	.tools2 {
+		position: relative;
+		display: flex;
+	}
+
+	.tools div {
+		width: 100%;
+		padding: 12px 0 7px 0;
+	}
+
+	.tools2 div {
+		width: 25.2%;
+		padding: 15px 0;
+		background-color: #fff;
+	}
+
+	.tools2:last-of-type {
+		margin-bottom: 20px;
+	}
+</style>
+
+<body>
+	<div id="manage">
+		<div class="search setbgcolor">
+			<span>管理</span>
+			<span class="iconfont setbgcolor icon-fangdajing" onclick="search()"></span>
+		</div>
+		<div id="header">
+			<div class="header">
+				<div id="wallet">
+					<center class="icontag">
+						<i class="iconfont icon-qianbao"></i>
+					</center>
+					<center class="describe">钱包</center>
+				</div>
+				<div id="backOrder">
+					<center class="icontag">
+						<i class="iconfont icon-tuikuanshouhou"></i>
+					</center>
+					<center class="describe">退款/售后</center>
+				</div>
+				<div id="childAccount">
+					<center class="icontag">
+						<i class="iconfont icon-yuangong"></i>
+					</center>
+					<center class="describe">子管理员</center>
+				</div>
+			</div>
+		</div>
+		<div class="content">
+			<div class="recomm">
+				<span>今日主推</span>
+				<span id="editFeature">编辑</span>
+			</div>
+			<div class="comm-diffe">
+				<template>
+					<ul>
+						<li v-for="item in items" @click="open(item)">
+							<div class="comm-name">
+								<center class="commodity-name">{{item.goods_name}}</center>
+							</div>
+							<img :src="item.goods_image | img" />
+						</li>
+					</ul>
+				</template>
+			</div>
+			<div class="recomm remcomm1">
+				<span>商品编辑</span>
+			</div>
+			<div class="tools">
+				<div id="classify" class="before-left">
+					<center class="icontag">
+						<i class="iconfont icon-quanfenleib"></i>
+					</center>
+					<center class="describe">类别管理</center>
+				</div>
+				<div id="carousel-picture" class="before-right">
+					<center class="icontag">
+						<i class="iconfont icon-tuwenxiangqing"></i>
+					</center>
+					<center class="describe">商品轮播图</center>
+				</div>
+				<div id="upDown">
+					<center class="icontag">
+						<i class="iconfont icon-lihuoshangjia"></i>
+					</center>
+					<center class="describe">上下架</center>
+				</div>
+				<div id="add-comm">
+					<center class="icontag">
+						<i class="iconfont icon-tianjia"></i>
+					</center>
+					<center class="describe">添加商品</center>
+				</div>
+			</div>
+			<div class="tools2">
+				<div id="set-goods-info">
+					<center class="icontag">
+						<i class="iconfont icon-shangpinguanli"></i>
+					</center>
+					<center class="describe">商品信息</center>
+				</div>
+				<!-- <div id="set-double-assort">
+					<center class="icontag">
+						<i class="iconfont icon-gengduopintuan"></i>
+					</center>
+					<center class="describe">商品双拼</center>
+				</div> -->
+			</div>
+		</div>
+	</div>
+	<script src="static/js/vue.js"></script>
+	<script src="static/js/mui.min.js"></script>
+	<script>
+		Vue.component('goods-info', {
+			template: '<center>{{content}}</center>',
+			props: ['content']
+		})
+		var vm = new Vue({
+			el: '#manage',
+			data: {
+				items: ''
+			},
+			created() {
+				this.getAjax()
+				this.setInter()
+			},
+			methods: {
+				setInter() {
+					let self = this
+					setInterval(() => {
+						self.getAjax()
+					}, 5000);
+				},
+				getAjax() {
+					let self = this
+					//  所有商品
+					mui.post(URL + 'GetGoodsList', function (data) {
+						data.data = data.data.filter(item => item.recommend == 1)
+						self.items = data.data
+					});
+				},
+				open(item) {
+					let c = setCreateWindow('manage/setSingleCommInfo.html', 'setSingleCommInfo.html', '商品设置')
+					mui.fire(c, 'refresh', {
+						goodsInfo: item,
+						page: 1
+					});
+					plus.nativeUI.showWaiting();
+				}
+			},
+			filters: {
+				img(v) {
+					return v != '' ? PicPath + 'goods_image/' + v : 'img/img.jpg'
+				}
+			}
+		})
+
+
+
+		//自定义窗体事件 刷新事件 要和子页面定义的 事件名称一致
+		window.addEventListener('refr', function (e) {
+			vm.getAjax()
+		});
+
+
+
+		//  搜索
+		var settimeaa = 0
+		function search() {
+			settimeaa++
+			if (settimeaa < 2) {
+				plus.webview.open('index/search.html', 'search.html', {}, 'slide-in-right', 200);
+				setTimeout(() => {
+					settimeaa = 0
+				}, 1500);
+			}
+		}
+
+
+		//  退单
+		document.getElementById('backOrder').onclick = function () {
+			setOpenWindow('manage/backOrder.html', 'backOrder.html', '售后', 'titleNView')
+		}
+
+		//  上下架
+		document.getElementById('upDown').onclick = function () {
+			setOpenWindow('manage/setUpDown.html', 'setUpDown.html', '上下架', 'titleNView')
+		}
+
+		//  子账户管理
+		document.getElementById('childAccount').onclick = function () {
+			setOpenWindow('manage/childAccount.html', 'childAccount.html', '子管理员', 'titleNView')
+		}
+
+		//  编辑主推
+		document.getElementById('editFeature').onclick = function () {
+			setOpenWindow('manage/setFeature.html', 'setFeature.html', '主推', 'titleNView')
+		}
+
+		//  设置商品信息
+		document.getElementById('set-goods-info').onclick = function () {
+			setOpenWindow('manage/setGoodsInfo.html', 'setGoodsInfo.html', '商品信息', 'titleNView')
+		}
+
+		//  轮播图管理
+		document.getElementById('carousel-picture').onclick = function () {
+			setOpenWindow('manage/setCarouselPicture.html', 'setCarouselPicture.html', '轮播图片', 'titleNView')
+		}
+
+		//  分类
+		document.getElementById('classify').onclick = function () {
+			setOpenWindow('manage/setClassify.html', 'setClassify.html', '类别管理', 'titleNView')
+		}
+
+		//  添加商品
+		document.getElementById('add-comm').onclick = function () {
+			setOpenWindow('manage/addComm.html', 'addComm.html', '添加商品', 'titleNView')
+		}
+
+		//  钱包
+		document.getElementById('wallet').onclick = function () {
+			setOpenWindow('manage/wallet.html', 'wallet.html', '钱包', 'titleNView')
+		}
+
+	</script>
+</body>
+
+</html>

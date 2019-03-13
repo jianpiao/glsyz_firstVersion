@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="stylesheet" href="../static/css/mui.min.css">
+	<link rel="stylesheet/less" type="text/css" href="style.css">
+	<link rel="stylesheet" href="../static/css/color.css">
+	<script src="../static/js/vue.js"></script>
+	<script src="../static/js/mui.min.js"></script>
+	<title>订单详情</title>
+</head>
+
+<style>
+	* {
+		-webkit-box-sizing: border-box;
+		box-sizing: border-box;
+		outline: 0;
+		-webkit-tap-highlight-color: transparent;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	body,
+    html {
+        font-size: .95rem;
+    }
+
+	body {
+		margin: 0;
+		display: block;
+		color: #000;
+		background-color: #ffffff;
+	}
+
+	::-webkit-scrollbar {
+		display: none;
+	}
+
+	.order {
+		width: 100%;
+		min-height: 100px;
+		margin: 10px auto 0 auto;
+		/* box-shadow: 0 1px 1px #ddd, 0 0 1px #aaa; */
+		padding: 8px 12px;
+	}
+
+	.order>div {
+		display: flex;
+		line-height: 35px;
+	}
+
+	.order>div>div:nth-child(1) {
+		text-align: left;
+	}
+
+	.order>div>div:nth-child(2) {
+		text-align: right;
+	}
+
+	.order-info div:nth-child(1) {
+		color: #777777;
+		text-align: left;
+		width: 30%;
+	}
+
+	.order-info div:nth-child(2) {
+		text-align: right;
+		color: #000;
+		width: 70%;
+	}
+
+	.order-food-c,
+	.order-foods-c {
+		display: block !important;
+		font-size: .94rem;
+	}
+
+	.order-foods-c {
+		border-top: 0.5px dashed rgba(0, 0, 0, .09);
+		color: #777777;
+		font-size: .9rem;
+	}
+
+	.order-food,
+	.order-foods {
+		display: flex;
+	}
+
+	.order-food div:nth-child(1),
+	.order-foods div:nth-child(1) {
+		width: 45%;
+		text-align: left;
+	}
+
+	.order-food div:nth-child(2),
+	.order-foods div:nth-child(2) {
+		width: 35%;
+		text-align: center;
+	}
+
+	.order-food div:nth-child(3),
+	.order-foods div:nth-child(3) {
+		width: 20%;
+		text-align: right;
+	}
+
+	.food-sign-price,
+	.sign {
+		color: #555555;
+	}
+
+	.food-num {
+		color: #555555;
+	}
+
+	.order-state {
+		color: #666;
+		font-size: .9rem;
+	}
+
+	#order-price {
+		font-size: 2.4rem;
+	}
+
+	.order-price div {
+		height: 50px;
+		line-height: 50px;
+	}
+
+	.order-price div,
+	.order-state div,
+	.chargeback div {
+		margin: 0 auto;
+	}
+
+	.chargeback {
+		width: 90%;
+		margin: 10px auto 30px auto;
+		font-size: 1rem;
+		line-height: 30px;
+		border-radius: 5px;
+		color: #FFF;
+		background-color: #009688;
+	}
+
+	.chargeback div {
+		width: 90%;
+		text-align: center !important;
+	}
+
+	#ripple {
+		position: absolute;
+		animation: f .3s ease-out;
+		background-color: #ffffff;
+		opacity: .1;
+		border-radius: 50%;
+	}
+
+	@keyframes f {
+		0% {
+			opacity: .5;
+			transform: scale(0);
+		}
+		100% {
+			transform: scale(1);
+		}
+	}
+
+	#rip {
+		width: 100%;
+		height: 35px;
+		line-height: 35px;
+		position: relative;
+		overflow: hidden;
+		border-radius: 6px;
+	}
+
+	.mui-title {
+		color: #ffffff;
+		line-height: 52px;
+	}
+
+	a {
+		color: #ffffff;
+	}
+
+	.mui-action-back {
+		line-height: 30px;
+	}
+
+	.food-pic {
+		height: 90px;
+		line-height: 120px;
+	}
+
+	.food-pic ul {
+		overflow-x: auto;
+		display: flex;
+		margin: 0;
+		padding: 0;
+	}
+
+	.food-pic ul li {
+		list-style-type: none;
+		margin: 10px 5px;
+	}
+
+	.food-pic ul li:first-child {
+		margin-left: 0;
+	}
+
+	.food-pic ul li,
+	img {
+		width: 100px;
+		height: 70px;
+	}
+
+	img {
+		border-radius: 5px;
+		-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.1) inset;
+		-moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.1) inset;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0px 0px 2px rgba(0, 0, 0, 0.1) inset;
+	}
+
+	.food-name {
+		overflow: hidden;
+		white-space: normal;
+	}
+
+	.order-food > div > p {
+		line-height: 20px;
+	}
+</style>
+
+<body>
+	<div id="detail">
+		<header></header>
+		<div class="order-detail">
+			<div class="order">
+				<div class="order-price">
+					<div>
+						<span id="order-price" v-text="items.order_price /100 | priceFilter"></span>
+					</div>
+				</div>
+				<div class="order-state">
+					<div v-text="items.order_state | orderState"></div>
+				</div>
+				<div class="order-info">
+					<div>订单编号</div>
+					<div>
+						<span v-text="items.order_id"></span>
+					</div>
+				</div>
+				<div class="order-info">
+					<div>订单类型</div>
+					<div>
+						<span style="color:#55A532" v-if="items.order_type == 1">{{items.order_type | orderType}}</span>
+						<span style="color:#6641E2" v-if="items.order_type == 2">{{items.order_type | orderType}}</span>
+						<span style="color:#41c6c7" v-if="items.order_type == 3">{{items.order_type | orderType}}</span>
+						<span style="color:#ad32c5" v-if="items.order_type == 4">{{items.order_type | orderType}}</span>
+						<span style="color:#e68932" v-if="items.order_type == 5">{{items.order_type | orderType}}</span>
+					</div>
+				</div>
+				<div class="order-info">
+					<div>下单时间</div>
+					<div v-text="items.date"></div>
+				</div>
+				<div class="order-info">
+					<div>付款时间</div>
+					<div v-text="items.date"></div>
+				</div>
+				<div class="order-info">
+					<div>用户名</div>
+					<div class="mui-pull-right" v-text="items.user_name"></div>
+				</div>
+				<div class="order-info">
+					<div>联系方式</div>
+					<div class="mui-pull-right" @click="call(items.phone_number)" v-text="items.phone_number"></div>
+				</div>
+				<div class="order-info">
+					<div>备注</div>
+					<div v-text="items.remark"></div>
+				</div>
+				<div class="order-info">
+					<div>地址</div>
+					<div v-text="items.address"></div>
+				</div>
+				<div class="order-foods-c">
+					<div class="order-food">
+						<div>菜名</div>
+						<div>
+							<span>单价</span>
+							<span>数量</span>
+						</div>
+						<div>价格</div>
+					</div>
+				</div>
+				<div class="order-food-c">
+					<div class="order-food">
+						<div class='food-name'>
+							<p v-for="item in items.order_information" v-text="item.goods_name"></p>
+						</div>
+						<div>
+							<p class='food-sign-price' v-for="item in items.order_information">{{item.goods_price /100 | priceFilter}}*{{item.number}}</p>
+						</div>
+						<div class='food-price'>
+							<p v-for="item in items.order_information" v-text="item.goods_price*item.number /100 | priceFilter"></p>
+						</div>
+					</div>
+				</div>
+				<div class="food-pic">
+					<ul>
+						<li v-for="item in items.order_information">
+							<img :src="item.goods_image | img">
+						</li>
+					</ul>
+				</div>
+				<div class="order-info">
+					<div>总价</div>
+					<div v-text="items.order_price/100 | priceFilter"></div>
+				</div>
+				<div class="order-info">
+					<div>系统订单号</div>
+					<div v-text="items.order_number"></div>
+				</div>
+				<div class="order-info">
+					<div>店铺订单号</div>
+					<div v-text="items.shop_every_id"></div>
+				</div>
+				<div class="chargeback">
+					<div id="rip" @touchstart="back = '#05867a'" @touchend="back = '#069687'" :style="{backgroundColor:back}" @click="submit">
+						售馨
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	
+	<script type="text/javascript">
+		mui.init();
+
+
+		//监听自定义事件，获取详情
+		document.addEventListener('searchID', function (e) {
+			//前页传入的数据，直接渲染，无需等待ajax请求详情后
+			vm.items = e.detail.num
+			plus.nativeUI.closeWaiting();
+		});
+
+
+		//窗口隐藏时，重置页面数据
+		mui.plusReady(function () {
+			var self = plus.webview.currentWebview();
+			self.addEventListener("hide", function (e) {
+				window.scrollTo(0, 0);
+				vm.items = ''
+			}, false);
+		})
+
+
+		//重写返回逻辑
+		mui.back = function () {
+			plus.webview.currentWebview().hide("slide-out-right", 200);
+		}
+
+
+		var vm = new Vue({
+			el: '#detail',
+			data: {
+				items: '',
+				back: '',
+				color: ''
+			},
+			methods: {
+				submit() {
+					let self = this
+					plus.nativeUI.confirm("是否确认提醒用户商品已经售馨？", function (e) {
+						if (e.index == 0) {
+							plus.nativeUI.showWaiting("请稍候...");
+							ConfirmBack(self.items.order_id)
+						}
+					})
+				},
+				call(i) {
+					plus.device.dial(i)
+				}
+			},
+			filters: {
+				priceFilter(v) {
+					return getFloatStr(v)
+				},
+				img(v) {
+					return v != '' ? PicPath + 'goods_image/' + v : '../img/img.jpg'
+				},
+				orderState(s) {
+					if (s == 1) {
+						return '已下单'
+					} else if (s == 2) {
+						return '已接单'
+					} else if (s == 3) {
+						return '已结单'
+					} else if (s == 4) {
+						return '退单中'
+					} else {
+						return '已退单'
+					}
+				},
+				orderType(v) {
+					if (v == 1) {
+						return '桌上点餐'
+					} else if (v == 2) {
+						return '预定点餐'
+					} else if (v == 3) {
+						return '线上点餐'
+					} else if (v == 4) {
+						return '前台点餐'
+					} else {
+						v
+					}
+				}
+			}
+		})
+
+
+
+		//  退单
+		function ConfirmBack(id) {
+			mui.post(URL + 'ConfirmBack', {
+				order_id: id
+			}, function (data) {
+				if (data.error == 0) {
+					plus.nativeUI.closeWaiting();
+					plus.nativeUI.toast('退单成功');
+					let c = plus.webview.getWebviewById('newOrder.html')
+					mui.fire(c, 'newOrder');
+					mui.back()
+				} else {
+					plus.nativeUI.closeWaiting();
+					plus.nativeUI.toast('退单失败');
+				}
+			})
+		}
+
+
+	</script>
+</body>
+
+</html>

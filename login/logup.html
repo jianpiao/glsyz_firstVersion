@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../static/css/mui.min.css">
+    <link rel="stylesheet" type="text/css" href="../static/fonts/left/iconfont.css" />
+    <title>注册</title>
+</head>
+<style>
+    body {
+        background-color: #fff;
+    }
+
+    .log {
+        width: 100%;
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .logo {
+        position: absolute;
+        z-index: 10;
+        top: 88px;
+        width: 100%;
+        text-align: center;
+        color: #fff;
+    }
+
+    .logo p {
+        margin: 10px 0 0 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        letter-spacing: 5px;
+    }
+
+
+    .account,
+    .password {
+        position: relative;
+        width: 88%;
+        margin: 0 auto;
+    }
+
+    input {
+        margin: 0 !important;
+        border: none !important;
+        outline: none;
+        width: inherit;
+        font-size: .98rem;
+        height: 1.5rem;
+        line-height: 1.5rem;
+        padding: 10px 45px 10px 40px !important;
+    }
+
+    .iconfont {
+        position: absolute;
+        font-size: 1.2rem;
+        top: 11px;
+        left: 8px;
+        color: #999
+    }
+
+    .icon-mima {
+        left: 6px;
+        font-size: 1.4rem;
+        color: #888;
+    }
+
+    .icon-nicheng {
+        font-size: 1.4rem;
+    }
+
+    .account::before,
+    .password::before {
+        content: '';
+        position: absolute;
+        top: 41px;
+        right: 4.5;
+        width: 91%;
+        border-bottom: 1px solid #cccccc;
+        -webkit-transform-origin: 0 0;
+        transform-origin: 0 0;
+        -webkit-transform: scaleY(0.4);
+        transform: scaleY(.4);
+        box-sizing: border-box;
+    }
+
+    .dele1 {
+        position: absolute;
+        top: 9px;
+        right: 29px;
+        color: #bbb;
+        font-size: .74rem;
+    }
+
+    .submit {
+        position: relative;
+        width: 80%;
+        text-align: center;
+        margin: 30px auto 40px auto;
+    }
+
+    .submit div {
+        margin: 0 10px;
+        height: 35px;
+        line-height: 35px;
+        color: #ffffff;
+        border-radius: 5px;
+        background-color: #009688;
+    }
+
+    .img {
+        margin-top: 25px;
+        padding-left: 30px;
+        width: 100%;
+        display: flex;
+    }
+
+    .img img {
+        width: 77%;
+        height: auto;
+        max-width: 200px;
+    }
+
+    .img div {
+        width: 100%;
+    }
+
+    .img div span {
+        color: #555;
+        font-size: .88rem;
+    }
+
+    .img div:nth-child(1) {
+        width: 50%;
+        color: #999;
+    }
+</style>
+
+<body>
+    <div id="login">
+        <img src="../img/m3.jpg" alt="" width="100%" height="200px">
+        <div class="logo">
+            <span>L&nbsp;O&nbsp;G&nbsp;U&nbsp;P</span>
+            <p>注册</p>
+        </div>
+
+        <div class="log">
+            <div class="account">
+                <i class="iconfont icon-xingmingyonghumingnicheng"></i>
+                <input type="text" placeholder="用户名(字母开头)" v-model="account" ref="account" />
+                <span class="dele1" v-show="account != ''" @click="account = ''">&#10005;</span>
+            </div>
+        </div>
+        <div class="log">
+            <div class="password">
+                <i class="iconfont icon-mima"></i>
+                <input type="password" placeholder="密码(字母开头)" v-model="password" ref="passWord" />
+                <span class="dele1" v-show="password != ''" @click="password = ''">&#10005;</span>
+            </div>
+        </div>
+        <div class="log">
+            <div class="password">
+                <i class="iconfont icon-cc-phone-handset"></i>
+                <input type="number" placeholder="手机号码" v-model="phone" ref="setPhone" />
+                <span class="dele1" v-show="phone != ''" @click="phone = ''">&#10005;</span>
+            </div>
+        </div>
+        <div class="log">
+            <div class="password">
+                <i class="iconfont icon-nicheng"></i>
+                <input type="text" placeholder="真实名字" v-model="realName" ref="setName" />
+                <span class="dele1" v-show="realName != ''" @click="realName = ''">&#10005;</span>
+            </div>
+        </div>
+        <div class="log">
+            <div class="password">
+                <i class="iconfont icon-credentials_icon"></i>
+                <input type="number" placeholder="身份证号" v-model="idCardNumber" ref="setCard" />
+                <span class="dele1" v-show="idCardNumber != ''" @click="idCardNumber = ''">&#10005;</span>
+            </div>
+        </div>
+        <div class="img">
+            <div class="private" ref="card0">个人照:</div>
+            <div>
+                <span v-show="!show1" @click="addImg(0)">点击添加</span>
+                <img :src="privatePic | img" v-show="show1" @click="addImg(0)">
+            </div>
+        </div>
+        <div class="img">
+            <div class="private" ref="card1">身份证正面:</div>
+            <div>
+                <span v-show="!show2" @click="addImg(1)">点击添加</span>
+                <img :src="cardP | img" v-show="show2" @click="addImg(1)">
+            </div>
+        </div>
+        <div class="img">
+            <div class="private" ref="card2">身份证反面:</div>
+            <div>
+                <span v-show="!show3" @click="addImg(2)">点击添加</span>
+                <img :src="cardO | img" v-show="show3" @click="addImg(2)">
+            </div>
+        </div>
+        <div class="submit" @click="check">
+            <div @touchstart="back = '#05867a'" @touchend="back = '#069687'" :style="{backgroundColor:back}">注册</div>
+        </div>
+
+    </div>
+
+    <script src="../static/js/vue.js"></script>
+    <script src="../static/js/mui.min.js"></script>
+    <script>
+        var vm = new Vue({
+            el: '#login',
+            data: {
+                account: '',
+                password: '',
+                phone: '',
+                realName: '',
+                idCardNumber: '',
+                back: '',
+                privatePic: '',
+                cardP: '',
+                cardO: '',
+                show1: false,
+                show2: false,
+                show3: false
+            },
+            mounted() {
+                mui.plusReady(function () {
+                    mui.init()
+                });
+            },
+            watch: {
+                account() {
+                    this.$refs.account.style.color = '#000'
+                },
+                password() {
+                    this.$refs.passWord.style.color = '#000'
+                },
+                phone() {
+                    this.$refs.setPhone.style.color = '#000'
+                },
+                realName() {
+                    this.$refs.setName.style.color = '#000'
+                },
+                idCardNumber() {
+                    this.$refs.setCard.style.color = '#000'
+                },
+                privatePic() {
+                    this.$refs.card0.style.color = '#999'
+                },
+                cardP() {
+                    this.$refs.card1.style.color = '#999'
+                },
+                cardO() {
+                    this.$refs.card2.style.color = '#999'
+                }
+            },
+            methods: {
+                check() {
+                    let self = this
+                    if (!checkUser(this.account)) {
+                        self.$refs.account.style.color = 'red'
+                    }
+                    if (!checkPassWord(this.password)) {
+                        self.$refs.passWord.style.color = 'red'
+                    }
+                    if (!checkPhone(this.phone)) {
+                        self.$refs.setPhone.style.color = 'red'
+                    }
+                    if (!checkName(this.realName)) {
+                        self.$refs.setName.style.color = 'red'
+                    }
+                    if (!checkCard(this.idCardNumber)) {
+                        self.$refs.setCard.style.color = 'red'
+                    }
+                    if (this.privatePic == '') {
+                        self.$refs.card0.style.color = 'red'
+                    }
+                    if (this.cardP == '') {
+                        self.$refs.card1.style.color = 'red'
+                    }
+                    if (this.cardO == '') {
+                        self.$refs.card2.style.color = 'red'
+                    }
+
+                    if (checkUser(this.account) &&
+                        checkUser(this.password) && 
+                        checkPhone(this.phone) && 
+                        checkName(this.realName) &&
+                        checkCard(this.idCardNumber) && 
+                        this.privatePic != '' && 
+                        this.cardP != '' && 
+                        this.cardO != '' ) 
+                        {
+                        self.setAjax()
+                    } else {
+                        plus.nativeUI.toast("内容填写有误，请重新输入！")
+                    }
+                },
+                setAjax() {
+                    let self = this
+                    mui.ajax(loginPath + 'Registration', {
+                        data: {
+                            account_name: self.account,
+                            account_pass: self.password,
+                            phone_number: self.phone,
+                            real_name: self.realName,
+                            id_number: self.idCardNumber,
+                            life_photos: self.privatePic,
+                            photo_positive: self.cardP,
+                            photo_other: self.cardO
+                        },
+                        dataType: 'json', //服务器返回json格式数据
+                        type: 'post', //HTTP请求类型
+                        success: function (data) {
+                            console.log(data.data)
+                            plus.nativeUI.alert(data.data)
+                            if (data.error == 0) {
+                                //  注册成功
+                                // plus.nativeUI.alert("注册成功！")
+                                mui.openWindow('login.html')
+                            }
+                        },
+                        error: function (xhr, type, errorThrown) {
+                            console.log("接口异常" + type);
+                        }
+                    })
+                },
+                addImg(i) {
+                    //  图片上传
+                    updataPicture(i)
+                }
+            },
+            filters: {
+                img(v) {
+                    return v != '' ? PicPath + 'Authentication/' + v : v
+                }
+            }
+        })
+
+        //用户名
+        function checkUser(num) {
+            var reg = /^[a-zA-Z][a-zA-Z0-9_]{3,15}$/
+            return reg.test(num);
+        }
+
+        //密码
+        function checkPassWord(num) {
+            var reg = /^[a-zA-Z]\w{6,17}$/
+            return reg.test(num);
+        }
+
+        // 数字验证
+        function checkPhone(num) {
+            var reg = /^(13[0-9]|14[5|7]|15[0|1|2|3|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/
+            return reg.test(num);
+        }
+
+        // 真实名字
+        function checkName(num) {
+            var reg = /^[\u4e00-\u9fa5]{2,5}$/
+            return reg.test(num);
+        }
+
+        // 身份证号
+        function checkCard(num) {
+            var reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/
+            return reg.test(num);
+        }
+
+
+        /*设置商品图片*/
+        function updataPicture(i) {
+            if (mui.os.plus) {
+                var a = [{
+                    title: "拍照"
+                }, {
+                    title: "从手机相册选择"
+                }];
+                plus.nativeUI.actionSheet({
+                    cancel: "取消",
+                    buttons: a
+                }, function (b) { /*actionSheet 按钮点击事件*/
+                    switch (b.index) {
+                        case 0:
+                            break;
+                        case 1:
+                            getImage(i); /*拍照*/
+                            break;
+                        case 2:
+                            galleryImg(i); /*打开相册*/
+                            break;
+                        default:
+                            break;
+                    }
+                })
+            }
+        }
+
+
+        /*设置商品图片*/
+        function addDom(i) {
+            if (mui.os.plus) {
+                var a = [{
+                    title: "拍照"
+                }, {
+                    title: "从手机相册选择"
+                }];
+                plus.nativeUI.actionSheet({
+                    cancel: "取消",
+                    buttons: a
+                }, function (b) { /*actionSheet 按钮点击事件*/
+                    switch (b.index) {
+                        case 0:
+                            break;
+                        case 1:
+                            getImage(i); /*拍照*/
+                            break;
+                        case 2:
+                            galleryImg(i); /*打开相册*/
+                            break;
+                        default:
+                            break;
+                    }
+                })
+            }
+        }
+
+
+        //拍照
+        function getImage(i) {
+            var cmr = plus.camera.getCamera();
+            var res = cmr.supportedImageResolutions[0];
+            var fmt = cmr.supportedImageFormats[0];
+            cmr.captureImage(function (path) {
+                plus.io.resolveLocalFileSystemURL(path, function (entry) {
+                    plus.nativeUI.showWaiting();
+                    var localUrl = entry.toLocalURL() + "?version=" + new Date().getTime();
+                    updataHead(i, localUrl);
+                }, function (err) {
+                    console.error("拍照失败：" + err.message);
+                }, {
+                        index: 1
+                    });
+            });
+        }
+
+        //本地相册选择
+        function galleryImg(i) {
+            plus.gallery.pick(function (a) {
+                plus.io.resolveLocalFileSystemURL(a, function (entry) {
+                    plus.io.resolveLocalFileSystemURL("_doc/", function (root) {
+                        root.getFile("head.png", {}, function (file) {
+                            //文件已存在
+                            file.remove(function () {
+                                console.log("file remove success");
+                                entry.copyTo(root, 'head.png', function (e) {
+                                    plus.nativeUI.showWaiting();
+                                    let path = e.fullPath + "?version=" + new Date().getTime();
+                                    updataHead(i, path); /*上传图片*/
+                                    //变更大图预览的src
+                                    //目前仅有一张图片，暂时如此处理，后续需要通过标准组件实现
+                                }, function (e) {
+                                    console.log('copy image fail:' + e.message);
+                                });
+                            }, function () {
+                                console.log("delete image fail:" + e.message);
+                            });
+                        }, function () {
+                            //文件不存在
+                            entry.copyTo(root, 'head.png', function (e) {
+                                plus.nativeUI.showWaiting();
+                                let path = e.fullPath + "?version=" + new Date().getTime();
+                                updataHead(i, path); /*上传图片*/
+                            }, function (e) {
+                                console.log('copy image fail:' + e.message);
+                            });
+                        });
+                    }, function (e) {
+                        console.log("get _www folder fail");
+                    })
+                }, function (e) {
+                    console.log("读取拍照文件错误：" + e.message);
+                });
+            }, function (a) { }, {
+                    filter: "image"
+                })
+        };
+
+        //上传商品图片
+        function updataHead(index, imgPath) {
+            var image = new Image();
+            image.src = imgPath;
+            image.onload = function () {
+                var imgData = getBase64Image(image);
+                //  图片上传
+                mui.ajax({
+                    url: loginPath + 'UpUserImage',
+                    type: 'POST',
+                    data: {
+                        image: imgData
+                    },
+                    dataType: 'json', //服务器返回json格式数据
+                    timeout: 10000, //超时时间设置为10秒；	
+                    success: function (data) {
+                        if (data.error == 0) {
+                            plus.nativeUI.closeWaiting();
+                            if (index == 0) {
+                                vm.show1 = true
+                                vm.privatePic = data.data
+                                console.log(data.data)
+                            } else if (index == 1) {
+                                vm.show2 = true
+                                vm.cardP = data.data
+                            } else {
+                                vm.show3 = true
+                                vm.cardO = data.data
+                            }
+                        } else {
+                            plus.nativeUI.closeWaiting();
+                            plus.nativeUI.toast('上传失败' + data.error);
+                        }
+                    },
+                    error: function (data) {
+                        console.log(JSON.stringify(data))
+                        plus.nativeUI.toast('服务器出错啦！');
+                    }
+                });
+            }
+        }
+
+        //将图片压缩转成base64
+        function getBase64Image(img) {
+            var canvas = document.createElement("canvas");
+            canvas.getAttribute('class', 'var canvas')
+            //			var canvas = document.getElementsByTagName('var canvas');
+            var width = img.width;
+            var height = img.height;
+            canvas.width = 600; /*设置新的图片的宽度*/
+            canvas.height = height/(width/600); /*设置新的图片的长度*/
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(img, img.x, img.y, 600, height / (width / 600)); /*绘图*/
+            var dataURL = canvas.toDataURL("image/png");
+            console.log(dataURL.length)
+            return dataURL
+        }
+    </script>
+</body>
+
+</html>

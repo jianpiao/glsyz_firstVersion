@@ -1,0 +1,301 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<link href="../static/css/mui.min.css" rel="stylesheet" />
+</head>
+<style type="text/css">
+	.food-type-tag {
+		position: fixed;
+		top: 0;
+		width: 100%;
+		height: 50px;
+		background-color: #ffffff;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, .1);
+		z-index: 100;
+		text-align: center;
+	}
+
+	.food-type-tag>div {
+		height: 50px;
+		float: left;
+		width: 25%;
+		color: #484b4c;
+	}
+
+	.food-type-tag>div p {
+		font-size: .9rem;
+		font-weight: 700;
+		margin: 0;
+		padding: 0;
+		height: 1.2rem;
+		line-height: 30px;
+	}
+
+	.food-name {
+		font-size: .94rem;
+		letter-spacing: 1px;
+		font-weight: 700;
+	}
+
+	.food-detail {
+		font-size: .8rem;
+		color: #777777;
+	}
+
+	.food-price {
+		color: #ec4b4b;
+		font-size: .9rem;
+		font-weight: 700;
+	}
+
+	.p4 {
+		width: 38px;
+		border: 1px solid #57968B;
+		border-radius: 4px;
+		font-size: .8rem;
+		color: #446B54;
+		text-align: center;
+		display: inline-block;
+	}
+
+	.mui-table-view {
+		margin-top: 50px;
+	}
+
+	.mui-table-view-cell {
+		padding: 14px;
+	}
+
+	.mui-table-view .mui-media-object {
+		max-width: 55px;
+		height: auto;
+	}
+
+	.active {
+		border-bottom: 2px solid #0aa394;
+		color: #0aa394 !important;
+	}
+
+	.state {
+		display: none !important;
+	}
+
+	.iconfont {
+		font-size: 42px;
+	}
+
+	img[src=""] {
+		opacity: 0;
+	}
+
+	.type {
+		color: #555;
+		font-size: .8rem;
+	}
+</style>
+
+<body>
+	<!--下拉刷新容器-->
+	<div id="refreshContainer" class="mui-content mui-scroll-wrapper">
+		<div class="food-type-tag">
+			<div :class="{active : setActive == 0}" @click="all">
+				<p>全部</p>
+				<goods-detail class="food-type-tag-name" :content="goodsAll"></goods-detail>
+			</div>
+			<div :class="{active : setActive == 1}" @click="comm">
+				<p>主推</p>
+				<goods-detail class="food-featured" :content="goodsComm"></goods-detail>
+			</div>
+			<div :class="{active : setActive == 2}" @click="setup">
+				<p>上架</p>
+				<goods-detail class="food-stateUp" :content="goodsUp"></goods-detail>
+			</div>
+			<div :class="{active : setActive == 3}" @click="setdown">
+				<p>下架</p>
+				<goods-detail class="food-stateDown" :content="goodsDown"></goods-detail>
+			</div>
+		</div>
+		<div class="mui-scroll">
+			<!--数据列表-->
+			<template>
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell mui-media" v-for="(item, index) in items" @click="open(index,item)">
+						<img class="mui-media-object mui-pull-right" :src="item.goods_image | img">
+						<span class="state">{{item.goods_state}}</span>
+						<div class="mui-media-body">
+							<div class="p4" v-if="item.recommend == 1">
+								<span class="food-recommend">{{item.recommend | rec}}</span>
+							</div>
+							<span class="food-name">{{item.goods_name}}</span>
+							<span class="food-price">￥</span>
+							<span class="food-price">{{item.goods_price /100 | priceFilter}}</span>
+							<p class="food-detail">{{item.goods_details}}</p>
+							<p class="type">
+								<span>类型:</span>
+								<span class="food-type">{{item.shop_goods_category_name}}</span>
+								&nbsp;&nbsp;&nbsp;
+								<span>编号:</span>
+								<span class="food-index">{{item.goods_id}}</span>
+							</p>
+						</div>
+					</li>
+				</ul>
+			</template>
+		</div>
+	</div>
+	<script src="../static/js/vue.js"></script>
+	<script src="../static/js/mui.min.js"></script>
+	<script type="text/javascript">
+		//  主推
+		var recommed = null;
+		//  状态
+		var state = null;
+		var num = 0;
+		mui.init({
+			pullRefresh: {
+				container: "#refreshContainer", //下拉刷新容器标识，querySelector能定位的css选择器均可，比如：id、.class等
+				down: {
+					style: 'circle', //必选，下拉刷新样式，目前支持原生5+ ‘circle’ 样式
+					color: '#2BD009', //可选，默认“#2BD009” 下拉刷新控件颜色
+					height: '70px', //可选,默认50px.下拉刷新控件的高度,
+					range: '130px', //可选 默认100px,控件可下拉拖拽的范围
+					offset: '50px', //可选 默认0px,下拉刷新控件的起始位置
+					auto: false, //可选,默认false.首次加载自动上拉刷新一次
+					callback: pullfresh //必选，刷新函数，根据具体业务来编写，比如通过ajax从服务器获取新数据；
+				}
+			}
+		});
+
+		//  下拉刷新
+		function pullfresh() {
+			num = 0;
+			num++
+			if (num < 2) {
+				// goodsAjax()
+				vm.getAjax()
+			}
+			mui('#refreshContainer').pullRefresh().endPulldown();
+		}
+
+
+		//  自定义组件
+		Vue.component('goods-detail', {
+			template: '<p>{{ content }}</p>',
+			props: ['content']
+		})
+
+
+		var vm = new Vue({
+			el: '#refreshContainer',
+			data: {
+				items: '',
+				itemsDate: '',
+				goodsAll: 0,
+				goodsComm: 0,
+				goodsUp: 0,
+				goodsDown: 0,
+				setActive: 0,
+				goodsCategoryList: ''
+			},
+			created() {
+				mui.plusReady(function (e) {
+					plus.nativeUI.showWaiting()
+				})
+				this.getAjax()
+			},
+			methods: {
+				getAjax() {
+					let self = this
+					mui.post(URL + 'GetGoodsList', function (data) {
+						plus.nativeUI.closeWaiting();
+						console.log(data.data)
+						if (data.error == 0) {
+							//  json按照编号排序
+							data.data = data.data.sort(down)
+							self.items = data.data
+							self.itemsDate = data.data
+							self.goodsAll = data.data.length
+							self.goodsComm = data.data.filter(item => item.recommend == 1).length
+							self.goodsUp = data.data.filter(item => item.goods_state == 2).length
+							self.goodsDown = data.data.filter(item => item.goods_state == 1).length
+						}
+					});
+
+
+					//	  商品分类
+					mui.post(URL + 'ShopGoodsCategoryList', function (data) {
+						if (data.error == 0) {
+							self.goodsCategoryList = data.data
+						}
+					});
+				},
+				all() {
+					this.setActive = 0
+					this.items = this.itemsDate
+					this.items = this.items.filter(item => item.goods_id != '')
+				},
+				comm() {
+					this.setActive = 1
+					this.items = this.itemsDate
+					this.items = this.items.filter(item => item.recommend == 1)
+				},
+				setup() {
+					this.setActive = 2
+					this.items = this.itemsDate
+					this.items = this.items.filter(item => item.goods_state == 2)
+				},
+				setdown() {
+					this.setActive = 3
+					this.items = this.itemsDate
+					this.items = this.items.filter(item => item.goods_state == 1)
+				},
+				open(i, item) {
+					let self = this
+					// localStorage.setItem('goodsId', v.goods_id)
+					let c = setCreateWindow('setSingleCommInfo.html', 'setSingleCommInfo.html', '商品设置')
+					mui.fire(c, 'refresh', {
+						goodsInfo: item,
+						page: 2,
+						goodsCategoryList: self.goodsCategoryList
+					});
+					plus.nativeUI.showWaiting();
+				}
+			},
+			filters: {
+				img(v) {
+					return v.length > 0 ? PicPath + 'goods_image/' + v : '../img/img.jpg'
+				},
+				rec(v) {
+					return v == 1 ? '主推' : ''
+				},
+				priceFilter(v) {
+					return getFloatStr(v)
+				}
+			}
+		})
+
+
+
+
+		//自定义窗体事件 刷新事件 要和子页面定义的 事件名称一致   
+		window.addEventListener('refr', function (e) {
+			vm.getAjax()
+		});
+
+		//重写返回逻辑
+		mui.back = function () {
+			plus.webview.currentWebview().close("slide-out-right", 200);
+		}
+
+		//  数组排序
+		function down(x, y) {
+			return (x.goods_id < y.goods_id) ? -1 : 1
+		}
+	</script>
+</body>
+
+</html>

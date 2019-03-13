@@ -1,0 +1,24 @@
+'carousel_figure_url'  => 'http://12.10.60.222/GL_Commercial_Street/public/static/images/carousel_figure/',
+'goods_image_url'      => 'http://12.10.60.222/GL_Commercial_Street/public/static/images/goods_image/',
+'shop_image_url'       => 'http://12.10.60.222/GL_Commercial_Street/public/static/images/shop_image/',
+'shop_back_image_url'  => 'http://12.10.60.222/GL_Commercial_Street/public/static/images/shop_back_image/',
+'Authentication_image_url' => 'http://12.10.60.222/GL_Commercial_Street/public/static/images/Authentication/',
+
+
+
+
+{
+"goods_id":28,
+"goods_name":"红烧茄子",
+"system_category_id":1,
+"category_name":"快餐",
+"shop_goods_category_id":1,
+"shop_goods_category_name":"招牌美食",
+"goods_price":1000,
+"goods_image":"",
+"recommend":1,
+"goods_details":"香喷喷的茄子",
+"goods_state":2,
+"goods_type":"[]",
+"roll_image":"[]"
+}

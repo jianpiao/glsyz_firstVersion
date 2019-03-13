@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../static/css/mui.min.css">
+    <link rel="stylesheet" href="../static/css/color.css">
+    <script src="../static/js/vue.js"></script>
+    <script src="../static/js/mui.min.js"></script>
+    <title>子账户</title>
+</head>
+<style>
+    p {
+        padding: 1px 0;
+        color: #777;
+    }
+
+    .state {
+        font-size: 1.02rem;
+        font-weight: 600;
+        color: #000 !important;
+    }
+
+    .showDetatil {
+        position: relative;
+        width: 100%;
+        height: auto;
+        padding: 20px 12px;
+        background-color: #fff;
+    }
+
+    .order-info {
+        position: inherit;
+        display: flex;
+        height: 35px;
+    }
+
+    .order-info div:nth-child(1) {
+		color: #777777;
+		text-align: left;
+        width: 30%;
+        font-size: .94rem;
+	}
+
+	.order-info div:nth-child(2) {
+		text-align: right;
+		color: #000;
+		width: 70%;
+    }
+    
+    .checkMore {
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+        font-size: .97rem;
+        color: #555;
+    }
+
+    .withdrawMoney {
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+</style>
+
+<body>
+    <div id="child-account">
+        <template>
+            <ul class="mui-table-view" v-show="show">
+                <li class="mui-table-view-cell" v-for="(item, index) in items" @click="submit(item)">
+                    <p>
+                        <span class="state">{{item.state | wathdrawState}}</span>
+                    </p>
+                    <p>
+                        <span>提款金额: {{item.money / 100 | priceFilter }}</span>
+                    </p>
+                    <p>
+                        <span>提款时间: {{item.creation_time}}</span>
+                    </p>
+                </li>
+                <p class="checkMore" @click="more">{{ loadingMore }}</p>
+            </ul>
+            <div v-show="!show" class="showDetatil">
+                <div class="order-info">
+                    <div>提款金额</div>
+                    <div class="withdrawMoney">{{itemDetail.money / 100 | priceFilter}}</div>
+                </div>
+                <div class="order-info">
+                    <div>店铺ID</div>
+                    <div>{{itemDetail.shop_id}}</div>
+                </div>
+                <div class="order-info">
+                    <div>提款人</div>
+                    <div>{{itemDetail.real_name}}</div>
+                </div>
+                <div class="order-info">
+                    <div>提款状态</div>
+                    <div>{{itemDetail.state | wathdrawState}}</div>
+                </div>
+                <div class="order-info">
+                    <div>提款时间</div>
+                    <div>{{itemDetail.creation_time}}</div>
+                </div>
+                <div class="order-info">
+                    <div>处理时间</div>
+                    <div>{{itemDetail.up_time}}</div>
+                </div>
+                <div class="order-info">
+                    <div>备注</div>
+                    <div>{{itemDetail.review_response}}</div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: '#child-account',
+            data: {
+                items: [],
+                back: '',
+                show: true,
+                itemDetail: '',
+                page: 1,
+                loadingMore: '加载更多'
+            },
+            mounted() {
+                mui.plusReady(function () {
+                    //关闭等待框  
+                    plus.nativeUI.showWaiting()
+                });
+                this.getAjax(this.page)
+            },
+            methods: {
+                getAjax(i) {
+                    let self = this
+                    mui.getJSON(URL + 'GetWithdrawList',
+                    {
+                        page: i
+                    }, function (data) {
+                        plus.nativeUI.closeWaiting()
+                        if (data.error == 0) {
+                            console.log(JSON.stringify(data.data.data))
+                            for(let i in data.data.data) {
+                                self.items.push(data.data.data[i])
+                            }
+                            self.loadingMore = '加载更多'
+                        }
+                    })
+                },
+                submit(v) {
+                    this.itemDetail = v
+                    this.show =! this.show
+                },
+                more() {
+                    this.loadingMore = '正在加载'
+                    this.getAjax(this.page++)
+                }
+            },
+            filters: {
+                priceFilter(v) {
+                    return getFloatStr(v)
+                },
+                wathdrawState(v) {
+                    if (v == 1) {
+                        return '待审核'
+                    } else if (v == 2) {
+                        return '取款成功'
+                    } else if (v == 3) {
+                        return '审核失败'
+                    }
+                }
+            }
+        })
+
+        window.addEventListener('ref', function (e) {
+            vm.getAjax()
+        })
+
+        //重写返回逻辑
+        mui.back = function () {
+            if (vm.show == false) {
+                vm.show =! vm.show
+            } else {
+                plus.webview.currentWebview().close("slide-out-right", 200);
+            }
+        }
+    </script>
+</body>
+
+</html>

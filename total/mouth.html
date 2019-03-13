@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>今天收益</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<!--<link rel="stylesheet" href="css/mui.min.css">-->
+	<link rel="stylesheet" href="../static/fonts/left/iconfont.css">
+</head>
+<style type="text/css">
+	body {
+		margin: 0;
+		background-color: rgba(0, 0, 0, .05)
+	}
+
+	header {
+		width: 100%;
+		background-color: #f9f9f9;
+		height: 40px;
+		line-height: 40px;
+		display: flex;
+		overflow: hidden;
+	}
+
+	header div {
+		width: 50%;
+		margin-left: 12px;
+	}
+
+	header div:nth-child(2) {
+		text-align: right;
+		margin-right: 12px;
+	}
+
+	.today-income {
+		width: 100%;
+		min-height: 100px;
+		padding-top: 12px;
+		background-color: #ffffff;
+		/*box-shadow: 0 1px 1px #dddddd, 0 0 1px #dddddd;*/
+	}
+
+	.today-income div {
+		display: flex;
+	}
+
+	.his-order-num,
+	.his-order-income {
+		text-align: center;
+	}
+
+	#his-income {
+		font-size: 2.5rem;
+	}
+
+	.his-order-num div,
+	.his-order-income div {
+		height: 50px;
+		line-height: 50px;
+		margin: 0 auto;
+		color: #00897b;
+	}
+
+	.order-quantity-unit {
+		padding-right: 12px;
+	}
+
+	#number_of_goods {
+		padding-left: 12px;
+	}
+
+	.his-success div {
+		padding: 0 12px 0 12px;
+		height: 40px;
+		line-height: 40px;
+	}
+
+	.his-success div:nth-child(1) {
+		width: 50%;
+	}
+
+	.his-success div:nth-child(2) {
+		width: 50%;
+		text-align: right;
+		display: block;
+	}
+
+	.summary {
+		margin: 20px 0 10px 0;
+		color: #8F8F94;
+		text-indent: 12px;
+		font-size: .9rem;
+	}
+
+	footer {
+		margin-top: 5px;
+	}
+
+	.day-list {
+		background-color: #ffffff;
+		display: flex;
+		height: 80px;
+		line-height: 70px;
+		padding: 10px 0;
+		border-bottom: 1px solid rgba(0, 0, 0, .1);
+	}
+
+	.list-left {
+		padding-top: 8px;
+		font-size: 1.8rem;
+		width: 30%;
+		color: #585858;
+		text-align: center;
+		background-color: #ffffff;
+		border-right: 1px solid rgba(0, 0, 0, .05);
+	}
+
+	.list-right {
+		display: block;
+		padding-left: 12px;
+		width: 70%;
+		line-height: 25px;
+	}
+
+	p {
+		width: 100%;
+		margin: 0;
+	}
+
+	.list-right p span {
+		font-size: .88rem;
+		color: #444;
+	}
+
+	.mask {
+		position: fixed;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		background-color: rgba(10, 0, 0, .08);
+		display: none;
+	}
+
+	.select-date {
+		position: fixed;
+		z-index: 10;
+		width: 130px;
+		top: 40px;
+		right: 0;
+		background-color: #ffffff;
+		-webkit-box-shadow: 0 0 2px rgba(0, 0, 0, 0.1), 0 0 20px rgba(0, 0, 0, 0.1);
+		-moz-box-shadow: 0 0 2px rgba(0, 0, 0, 0.1), 0 0 20px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 0 rgba(0, 0, 0, 0.1), 0px 0px 20px rgba(0, 0, 0, 0.1);
+		display: none;
+	}
+
+	.select-date ul {
+		width: 100%;
+		margin: 0;
+		padding: 0;
+	}
+
+	.select-date li {
+		height: 35px;
+		line-height: 35px;
+		list-style-type: none;
+		text-align: center;
+		font-size: .9rem;
+		margin: 0 12px;
+		border-bottom: 1px solid #eeeeee;
+		letter-spacing: 1px;
+	}
+
+	.select-date li:last-child {
+		border-bottom: none;
+	}
+
+	#month {
+		position: fixed;
+		z-index: 10;
+		width: 100%;
+		top: 0;
+		right: 0;
+		height: 40px;
+		outline: none;
+		border: none;
+		margin: 0;
+		opacity: 0;
+	}
+
+	.income {
+		font-weight: 700;
+		color: #000 !important;
+		font-size: .97rem !important;
+	}
+
+	.income-tr {
+		font-size: 1.1rem !important;
+	}
+
+	.mui-pull-caption {
+		height: 0;
+		display: none;
+	}
+</style>
+
+<body>
+	<div id="month-list">
+		<header>
+			<div>
+				<span>月份</span>
+			</div>
+			<div>
+				<input type="month" id="month" onchange="input(value)">
+				<span class="his-today"></span>
+			</div>
+		</header>
+		<div class="today-income">
+			<div class="his-order-income">
+				<div>
+					<span id="his-income"></span> ￥
+				</div>
+			</div>
+			<div class="his-order-num">
+				<div>
+					<span id="order-quantity"></span>
+					<span class="order-quantity-unit">单</span> |
+					<span id="number_of_goods"></span>
+					<span class="order-quantity-num">份</span>
+				</div>
+			</div>
+			<div class="his-success check-chart" @click="chart">
+				<div>月份曲线</div>
+				<div>
+					<span>
+						<i class="iconfont icon-chartline"></i>
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="summary">每日情况</div>
+		<footer>
+			<template>
+				<div class="day-list" v-for="item in items" @click="open(item.date)">
+					<div class="list-left">
+						<p>
+							<span>{{item.date | day}}</span>
+						</p>
+					</div>
+					<div class="list-right">
+						<p>
+							<span class="income">总收入:</span>
+							<span class="income income-tr">{{item.turnover /100 | priceFilter}}</span>
+						</p>
+						<p>
+							<span>单数:</span>
+							<span>{{item.number_of_goods}}</span>
+						</p>
+						<p>
+							<span>份数:</span>
+							<span>{{item.number_of_goods}}</span>
+						</p>
+					</div>
+					<div class="list-right">
+						<p>
+							<span>&nbsp;</span>
+						</p>
+						<p>
+							<span>打包费:</span>
+							<span>{{item.packing_fee /100 | priceFilter}}</span>
+						</p>
+						<p>
+							<span>外卖费:</span>
+							<span>{{item.takeout_fee /100 | priceFilter}}</span>
+						</p>
+					</div>
+				</div>
+			</template>
+		</footer>
+		<div class="mask"></div>
+		<div class="select-date">
+			<ul>
+			</ul>
+		</div>
+	</div>
+	<script src="../static/js/vue.js"></script>
+	<script src="../static/js/mui.min.js"></script>
+
+	<script type="text/javascript">
+		mui.init({
+			swipeBack: true,
+			pullRefresh: {
+				container: "#month-list", //下拉刷新容器标识，querySelector能定位的css选择器均可，比如：id、.class等
+				down: {
+					style: 'circle', //必选，下拉刷新样式，目前支持原生5+ ‘circle’ 样式
+					color: '#2BD009', //可选，默认“#2BD009” 下拉刷新控件颜色
+					height: '70px', //可选,默认50px.下拉刷新控件的高度,
+					range: '130px', //可选 默认100px,控件可下拉拖拽的范围
+					offset: '0px', //可选 默认0px,下拉刷新控件的起始位置
+					auto: true, //可选,默认false.首次加载自动上拉刷新一次
+					callback: pullfresh //必选，刷新函数，根据具体业务来编写，比如通过ajax从服务器获取新数据；
+				}
+			}
+		});
+
+		//  下拉刷新
+		function pullfresh() {
+			getAjax(SelectYears, SelectMonth)
+			document.getElementsByClassName('his-today')[0].innerText = SelectYears + '-' + SelectMonth
+			mui('#month-list').pullRefresh().endPulldown();
+		}
+
+		//  打开报表
+		document.getElementsByClassName('check-chart')[0].addEventListener('tap', function () {
+			setOpenWindow('mouth-chart.html', 'mouth-detail.html', '订单详情')
+		})
+
+
+		//  日期选择
+		function input(value) {
+			plus.nativeUI.showWaiting();
+			console.log(value.substr(0, 4) + "===" + value.substr(5, 2))
+			getAjax(value.substr(0, 4), value.substr(5, 2))
+			document.getElementsByClassName('his-today')[0].innerText = value
+		}
+
+
+
+		//  默认当前的年月
+		var SelectYears = ''
+		var SelectMonth = ''
+		SelectYears = new Date().getFullYear()
+		SelectMonth = new Date().getMonth() + 1
+		if (SelectMonth < 10) {
+			SelectMonth = '0' + SelectMonth
+		}
+		document.getElementsByClassName('his-today')[0].innerText = SelectYears + "-" + SelectMonth
+
+
+		var vm = new Vue({
+			el: '#month-list',
+			data: {
+				items: ''
+			},
+			methods: {
+				open(time) {
+					//  跳转到订单详情页面
+					open_detail(time)
+				},
+				chart() {
+					setOpenWindow('chart.html', 'chart.html', '月份曲线', 'titleNView')
+					plus.nativeUI.showWaiting();
+				}
+			},
+			filters: {
+				day(v) {
+					return v.substr(8, 2)
+				},
+				priceFilter(v) {
+					return getFloatStr(v)
+				}
+			}
+		})
+
+
+		window.onload = function () {
+			//从服务器获取数据  
+			// 今天销售情况
+			getAjax(SelectYears, SelectMonth)
+			//业务数据获取完毕，并已插入当前页面DOM；  
+			//注意：若为ajax请求，则需将如下代码放在处理完ajax响应数据之后；  
+			mui.plusReady(function () {
+				//关闭等待框  
+				plus.nativeUI.closeWaiting();
+				//显示当前页面  
+				mui.currentWebview.show();
+			});
+		}
+
+		function getAjax(y, m) {
+			console.log(y + "==" + m)
+			mui.ajax(beforePath + shopManagePath + 'MonthlyTurnover', {
+				data: {
+					year: y,
+					month: m
+				},
+				dataType: 'json', //服务器返回json格式数据
+				type: 'post', //HTTP请求类型
+				timeout: 10000, //超时时间设置为10秒；
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				success: function (data) {
+					console.log(data.data)
+					console.log(data.data.basic_price)
+					if (data.error == 0) {
+						document.getElementById('order-quantity').innerText = data.data.shop_flow
+						document.getElementById('his-income').innerText = getFloatStr(data.data.turnover / 100)
+						document.getElementById('number_of_goods').innerText = data.data.number_of_goods
+						//  插入 每日列表
+						vm.items = data.data.details
+						plus.nativeUI.closeWaiting();
+					} else {
+						vm.items = ''
+						document.getElementById('order-quantity').innerText = 0
+						document.getElementById('his-income').innerText = 0
+						document.getElementById('number_of_goods').innerText = 0
+						plus.nativeUI.showWaiting();
+					}
+				},
+				error: function (xhr, type, errorThrown) {
+					console.log("总计数据接收异常" + type);
+				}
+			})
+		}
+
+
+		function open_detail(time) {
+			let c = setCreateWindow('today.html', 'today.html', '每日收益', 'titleNView')
+			//触发子窗口变更新闻详情
+			mui.fire(c, 'today', {
+				day: time
+			});
+			c.show("slide-in-right", 200);
+		}
+
+
+		//重写返回逻辑
+		mui.back = function () {
+			plus.webview.currentWebview().close("slide-out-right", 200);
+		}
+	</script>
+</body>
+
+</html>

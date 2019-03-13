@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>今天收益</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<!--<link rel="stylesheet" href="css/mui.min.css">-->
+	<link rel="stylesheet" href="../static/fonts/left/iconfont.css">
+	<!--<link rel="stylesheet" href="css/main.css">-->
+</head>
+<style type="text/css">
+	body {
+		margin: 0;
+		background-color: rgba(0, 0, 0, .05)
+	}
+
+	.chart {
+		height: 200px;
+		margin: 0px;
+		padding: 0px;
+	}
+
+	h5 {
+		margin-top: 30px;
+		font-weight: bold;
+		text-indent: 8px;
+		color: #888888;
+	}
+
+	h5:first-child {
+		margin-top: 15px;
+	}
+
+	h2 {
+		text-align: center;
+		color: #444444;
+	}
+</style>
+
+<body>
+	<div class="day">
+
+	</div>
+	<div class="mui-content">
+		<div class="mui-content-padded">
+			<!--<h2> 营业收入统计图</h2>-->
+		</div>
+		<div class="mui-content-padded">
+			<h5>一周销售量对比</h5>
+			<div class="chart" id="barChart"></div>
+		</div>
+	</div>
+</body>
+
+</html>
+
+<script src="../static/js/mui.min.js"></script>
+<script src="../static/js/echarts-all.js"></script>
+<script type="text/javascript">
+	mui.init({
+		swipeBack: true
+	});
+	//菜品过去7天销售情况:
+	//接口名:WeekStatistics
+	//POST:
+	//goods_id: 菜品ID,测试时写1
+	//返回:
+	//error:错误，当他大于0时代表错误
+	//data: 返回的数据	
+	// goods_flow	:改商品的销售量
+	// details	:细节（可以根据此数据绘图）
+	//0	
+	//goods_id	:菜品ID
+	//goods_flow	:菜品当天的销售量
+	//date	:日期
+	//1	
+	//goods_id	1
+	//goods_flow	12
+	//date	"2017-12-06 00:00:00"
+
+
+	window.onload = function () {
+		//从服务器获取数据  
+		// 今天销售情况
+		mui.ajax(beforePath + shopManagePath + 'WeekStatistics', {
+			data: '',
+			dataType: 'json', //服务器返回json格式数据
+			type: 'post', //HTTP请求类型
+			timeout: 10000, //超时时间设置为10秒；
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			success: function (data) {
+				console.log(data.data)
+				if (data.error === 0) {
+					var day = [];
+					//  获取这个星期营业的天数
+					for (let n = 0; n < 7; n++) {
+						day[n] = data.data.details.length > n ? data.data.details[n].turnover / 100 : 0
+					}
+
+					var getOption = function (chartType) {
+						var chartOption = chartType == 'pie' ? {} : {
+							legend: {
+								data: ['销售量']
+							},
+							grid: {
+								x: 35,
+								x2: 10,
+								y: 30,
+								y2: 25
+							},
+							toolbox: {
+								show: false,
+								feature: {
+									mark: {
+										show: true
+									},
+									dataView: {
+										show: true,
+										readOnly: false
+									},
+									magicType: {
+										show: true,
+										type: ['bar']
+									},
+									restore: {
+										show: true
+									},
+									saveAsImage: {
+										show: true
+									}
+								}
+							},
+							calculable: false,
+							xAxis: [{
+								type: 'category',
+								data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+							}],
+							yAxis: [{
+								type: 'value',
+								splitArea: {
+									show: true
+								}
+							}],
+							series: [{
+								name: '销售量',
+								type: chartType,
+								data: day
+							}]
+						};
+						return chartOption;
+					};
+					var byId = function (id) {
+						return document.getElementById(id);
+					};
+					var barChart = echarts.init(byId('barChart'));
+					barChart.setOption(getOption('bar'));
+
+
+				} else {
+
+				}
+
+			},
+			error: function (xhr, type, errorThrown) {
+
+				console.log("总计数据接收异常" + type);
+			}
+		})
+		//业务数据获取完毕，并已插入当前页面DOM；  
+		//注意：若为ajax请求，则需将如下代码放在处理完ajax响应数据之后；  
+		mui.plusReady(function () {
+			//关闭等待框  
+			plus.nativeUI.closeWaiting();
+			//显示当前页面  
+			mui.currentWebview.show();
+		});
+	}
+
+	//重写返回逻辑
+	mui.back = function () {
+		plus.webview.currentWebview().close("slide-out-right", 200);
+	}
+</script>

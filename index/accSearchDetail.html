@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../static/css/mui.min.css">
+    <link rel="stylesheet" href="../static/css/color.css">
+    <script src="../static/js/vue.js"></script>
+    <script src="../static/js/mui.min.js"></script>
+    <title>子账户详情</title>
+</head>
+<style>
+    html,
+    body {
+        font-size: .96rem;
+    }
+
+    .mui-pull-right {
+        width: 70%;
+        text-align: right;
+    }
+
+    span {
+        color: #7c8886;
+    }
+
+    .button {
+        padding: 20px 0;
+        background-color: #fff;
+    }
+
+    #submit {
+        height: 35px;
+        line-height: 35px;
+        width: 85%;
+        font-size: 16px;
+        margin: 20px auto;
+        border-radius: 5px;
+        color: #ffffff;
+    }
+
+    .mui-table-view-cell>a:not(.mui-btn).mui-active {
+		background-color: #ffffff;
+	}
+</style>
+
+<body>
+    <div id="child-account">
+        <template>
+            <ul class="mui-table-view">
+                <li class="mui-table-view-cell">
+                    <span>账户名称</span>
+                    <div class="mui-pull-right">{{items.account_name}}</div>
+                </li>
+                <li class="mui-table-view-cell">
+                    <span>真实名字</span>
+                    <div class="mui-pull-right">{{items.real_name}}</div>
+                </li>
+                <li class="mui-table-view-cell">
+                    <span>联系方式</span>
+                    <div class="mui-pull-right">{{items.phone_number}}</div>
+                </li>
+                <li class="mui-table-view-cell">
+                    <span>邮箱</span>
+                    <div class="mui-pull-right">{{items.email}}</div>
+                </li>
+                <li class="mui-table-view-cell">
+                    <a>
+                        <span>拥有权限</span>
+                        <div class="mui-pull-right">{{items.authority_info.length}} 个</div>
+                    </a>
+                </li>
+                <li class="mui-table-view-cell">
+                    <a>
+                        <span>权限内容</span>
+                        <div class="mui-input-row mui-checkbox">
+                            <label>订单管理</label>
+                            <input name="checkbox" v-model="au1" type="checkbox" :checked="au1">
+                        </div>
+                        <div class="mui-input-row mui-checkbox">
+                            <label>店铺信息管理</label>
+                            <input name="checkbox" v-model="au2" type="checkbox" :checked="au2">
+                        </div>
+                        <div class="mui-input-row mui-checkbox">
+                            <label>商品管理</label>
+                            <input name="checkbox" v-model="au3" type="checkbox" :checked="au3">
+                        </div>
+                        <div class="mui-input-row mui-checkbox">
+                            <label>统计管理</label>
+                            <input name="checkbox" v-model="au4" type="checkbox" :checked="au4">
+                        </div>
+                        <div class="mui-input-row mui-checkbox">
+                            <label>子管理员管理</label>
+                            <input name="checkbox" v-model="au5" type="checkbox" :checked="au5">
+                        </div>
+                        <div class="mui-input-row mui-checkbox">
+                            <label>资金管理</label>
+                            <input name="checkbox" v-model="au6" type="checkbox" :checked="au6">
+                        </div>
+                    </a>
+                </li>
+                <div class="mui-button-row button">
+                    <div id="submit" @click="submit" @touchstart="back = '#05867a'" @touchend="back = '#069687'" :style="{backgroundColor:back}">确认</div>
+                </div>
+            </ul>
+        </template>
+    </div>
+
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: '#child-account',
+            data: {
+                items: '',
+                back: '',
+                authorityList: [],
+                au1: '',
+                au2: '',
+                au3: '',
+                au4: '',
+                au5: '',
+                au6: ''
+            },
+            methods: {
+                submit() {
+                    if (this.au1 == true || 
+                        this.au2 == true ||
+                        this.au3 == true ||
+                        this.au4 == true ||
+                        this.au5 == true ||
+                        this.au6 == true) {
+                            this.check()
+                    } else {
+                        plus.nativeUI.alert("你还设置任何权限哦！", function () {
+                            console.log("ok");
+                        }, "提示", "确定");
+                    }
+                    
+                },
+                check() {
+                    let self = this
+                    plus.nativeUI.confirm("设置权限后即成为您的子管理员，将会拥有您店铺内对应的权限", function (e) {
+                        if (e.index == 0) {
+                            //  先清空数组
+                            self.authorityList = []
+                            //  再往数组里面添加元素
+                            self.au1 == true ? self.authorityList.push(1) : self.au1 = false
+                            self.au2 == true ? self.authorityList.push(2) : self.au2 = false
+                            self.au3 == true ? self.authorityList.push(3) : self.au3 = false
+                            self.au4 == true ? self.authorityList.push(4) : self.au4 = false
+                            self.au5 == true ? self.authorityList.push(5) : self.au5 = false
+                            self.au6 == true ? self.authorityList.push(6) : self.au6 = false
+                            self.SetUserAuthority()
+                        }
+                    })
+                },
+                SetUserAuthority() {
+                    let self = this
+                    mui.post(URL + 'SetUserAuthority',{
+                        account_id: self.items.account_id,
+                        authority_value: JSON.stringify(self.authorityList)
+                    }, function (data) {
+                        if (data.error == 0) {
+                            plus.nativeUI.toast('设置成功');
+                            mui.back()
+                        } else {
+                            plus.nativeUI.toast('设置失败');
+                        }
+                    })
+                }
+            },
+            filters: {
+                auManage(v) {
+                    if (v == 1) {
+                        return '订单管理'
+                    } else if (v == 2) {
+                        return '店铺信息管理'
+                    } else if (v == 3) {
+                        return '商品管理'
+                    } else if (v == 4) {
+                        return '统计管理'
+                    } else if (v == 5) {
+                        return '子管理员管理'
+                    } else if (v = 6) {
+                        return '资金管理'
+                    }
+                }
+            }
+        })
+
+        window.addEventListener('refresh', function (e) {
+            let g = e.detail.goodsInfo.authority_info
+            vm.items = e.detail.goodsInfo
+            for (let i in g) {
+                if (g[i].authority == 1) {
+                    vm.au1 = true
+                } else if (g[i].authority == 2) {
+                    vm.au2 = true
+                } else if (g[i].authority == 3) {
+                    vm.au3 = true
+                } else if (g[i].authority == 4) {
+                    vm.au4 = true
+                } else if (g[i].authority == 5) {
+                    vm.au5 = true
+                } else if (g[i].authority == 6) {
+                    vm.au6 = true
+                }
+            }
+        })
+
+        //重写返回逻辑
+        mui.back = function () {
+            plus.webview.currentWebview().close("slide-out-right", 200);
+        }
+    </script>
+</body>
+
+</html>

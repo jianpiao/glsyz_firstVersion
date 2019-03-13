@@ -1,0 +1,367 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link href="../static/css/mui.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../static/css/color.css">
+    <link href="../static/fonts/left/iconfont.css" rel="stylesheet" />
+</head>
+<style type="text/css">
+    body,
+    html {
+        font-size: 1rem;
+    }
+
+    .search {
+        position: fixed;
+        width: 100%;
+        height: 76px;
+        top: 0;
+        left: 0;
+        background-color: #ffffff;
+        z-index: 100;
+        text-align: center;
+    }
+
+    .search>input {
+        width: 93%;
+        margin: 36px auto 8px auto;
+        padding: 0 50px;
+        color: #444444;
+        font-size: 15px;
+        background-color: rgba(0, 0, 0, .07)
+    }
+
+    input[type=search] {
+        text-align: left;
+    }
+
+    .mui-action-back {
+        position: fixed;
+        left: 27px;
+        top: 44px;
+        color: #666666;
+        font-size: 17px;
+    }
+
+    .ok {
+        position: fixed;
+        right: 27px;
+        top: 44px;
+        color: #666666;
+        font-weight: 700;
+    }
+
+    header {
+        position: fixed;
+        z-index: 100;
+        top: 76px;
+        left: 0;
+        width: 100%;
+        height: 40px;
+        display: flex;
+        background-color: #ffffff;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
+        margin-bottom: 10px;
+    }
+
+    header div {
+        width: 100%;
+        height: inherit;
+        line-height: 40px;
+        font-size: 15px;
+        text-align: center;
+    }
+
+    .active {
+        border-bottom: 2px solid #0aa394;
+    }
+
+    .mui-table-view {
+        margin-top: 116px;
+        z-index: 10;
+    }
+
+    .mui-table-view-cell>a>span:nth-child(3) {
+        margin: 8px;
+    }
+
+    .pname {
+        font-weight: 700;
+        font-size: .9rem;
+        width: 100%;
+        overflow: hidden;
+        display: inline-block;
+        text-overflow: ellipsis;
+    }
+
+    .price {
+        color: #EF4F4F;
+    }
+
+    .interval {
+        margin: 5px;
+    }
+
+    .mui-table-view-cell>a>p,
+    .mui-table-view-cell>a>span:nth-child(3),
+    .mui-table-view-cell>a>span:nth-child(4) {
+        color: #777;
+        font-size: .84rem;
+    }
+
+    .searchFail {
+        position: absolute;
+        width: 100%;
+        top: 150px;
+        font-size: 1rem;
+        color: #888888;
+        z-index: 0;
+    }
+
+    .history {
+        position: absolute;
+        width: 100%;
+        top: 76px;
+        left: 0;
+        z-index: 50;
+        background-color: #ffffff;
+    }
+
+    .history>p {
+        font-size: .91rem;
+        font-weight: 700;
+        padding: 2px 17px;
+        margin: 13px 0 0 0;
+    }
+
+    .view {
+        margin-top: 0 !important;
+    }
+
+    .history-tag {
+        color: #777;
+        font-size: 18px;
+    }
+
+    .history-div {
+        width: calc(100% - 55px);
+        color: #666666;
+        font-size: .92rem;
+        line-height: 20px;
+        padding-left: 8px;
+        overflow: hidden;
+        display: inline-block;
+        text-overflow: ellipsis;
+    }
+
+    .clean {
+        position: absolute;
+        top: 2px;
+        right: 25px;
+        font-weight: 700;
+    }
+
+    .a {
+        display: flex !important;
+    }
+
+    .lis {
+        color: #bbb;
+        font-size: 14px;
+    }
+
+    .icon-fangdajing {
+        font-size: 18px;
+    }
+
+    .mui-table-view-cell p {
+        color: #7c8886;
+        font-size: .94rem;
+        line-height: 25px;
+    }
+
+    .mui-table-view-cell p span {
+        color: #111;
+    }
+
+    .au {
+        text-indent: 4rem;
+    }
+</style>
+
+<body>
+    <div id="search">
+        <div class="search">
+            <span class="iconfont icon-left mui-action-back"></span>
+            <span class="ok" @click="ok">&nbsp;
+                <i class="iconfont icon-fangdajing"></i>
+            </span>
+            <input type="search" value="" v-focus id="input" @keyup.13="ok" v-model="searchValue" placeholder="搜索账户名/手机号/邮箱" />
+        </div>
+        <header v-show="result">
+            <div @click="orderNum" :class="{'active':currentIndex == 1 }">账号名</div>
+            <div @click="orderTime" :class="{'active':currentIndex == 2 }">手机号码</div>
+            <div @click="orderPhone" :class="{'active':currentIndex == 3 }">电子邮件</div>
+        </header>
+        <template>
+            <ul class="mui-table-view">
+                <li class="mui-table-view-cell" v-for="(item, index) in items" @click="openWebview(item)">
+                    <p>
+                        账户名称 :
+                        <span>{{item.account_name}}</span>
+                    </p>
+                    <p>
+                        真实姓名 :
+                        <span>{{item.real_name}}</span>
+                    </p>
+                    <p>
+                        手机号码 : 
+                        <span>{{item.phone_number}}</span>
+                    </p>
+                    <p>
+                        邮箱 :
+                        <span>{{item.email}}</span>
+                    </p>
+                </li>
+            </ul>
+        </template>
+        <div class="searchFail" v-show="result">
+            <center>未找到相关信息</center>
+        </div>
+        <div class="history" v-show="historySearch">
+            <p>搜索历史</p>
+            <ul class="mui-table-view view">
+                <li class="mui-table-view-cell" v-show="this.historys.length == 0">
+                    <span>暂无搜索记录</span>
+                </li>
+                <li class="mui-table-view-cell" v-for="(item, index) in historys" @click="historyIndex(item)">
+                    <a class="a">
+                        <span class="iconfont icon-lishijilu lis"></span>
+                        <span-name class="history-div" :content="item"></span-name>
+                        <span class="clean" @click.stop="historyRemove(index)">&#10005;</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+<script src="../static/js/vue.js"></script>
+<script src="../static/js/mui.min.js"></script>
+<script type="text/javascript">
+    //  判断本地的历史记录是否为空
+    var read = JSON.parse(localStorage.getItem('historySearchValueAcc')) == null ? [] : JSON.parse(localStorage.getItem('historySearchValueAcc'))
+
+    Vue.component('span-name', {
+        template: '<span>{{content}}</span>',
+        props: ['content']
+    })
+
+    var vm = new Vue({
+        el: '#search',
+        data: {
+            items: [],
+            currentIndex: 1,
+            searchValue: '',
+            result: false,
+            historySearch: true,
+            historys: read
+        },
+        created() {
+            mui.plusReady()
+        },
+        methods: {
+            getChildAcc(i,v) {
+                let self  = this
+                mui.post(URL + 'SearchUser', {
+                    type: i,
+                    value: v
+                }, function (data) {
+                    plus.nativeUI.closeWaiting()
+                    if (data.error == 0) {
+                        plus.nativeUI.closeWaiting()
+                        console.log(data.data)
+                        self.items = data.data
+                    }
+                });
+            },
+            //  四个搜索选项卡
+            orderNum() {
+                plus.nativeUI.showWaiting()
+                this.currentIndex = 1
+                this.getChildAcc(1, this.searchValue)
+            },
+            orderTime() {
+                plus.nativeUI.showWaiting()
+                this.currentIndex = 2
+                this.getChildAcc(2, this.searchValue)
+            },
+            orderPhone() {
+                plus.nativeUI.showWaiting()
+                this.currentIndex = 3
+                this.getChildAcc(3, this.searchValue)
+            },
+            openWebview(i) {
+                //  打开详情页面
+                open(i)
+            },
+            ok() {
+                // 点击搜索或者手机键盘确认按键触发函数
+                this.historySearch = false
+                this.result = true
+                this.currentIndex = 1
+                this.getChildAcc(1, this.searchValue)
+                //  判断如果不和上次输入的重复就添加到历史搜索记录
+                if (this.searchValue != read[0]) {
+                    this.historys.unshift(this.searchValue)
+                    localStorage.setItem('historySearchValueAcc', JSON.stringify(this.historys))
+                }
+
+            },
+            historyIndex(value) {
+                //  点击历史记录
+                this.historySearch = false
+                this.result = true
+                this.searchValue = value
+                this.currentIndex = 1
+                this.getChildAcc(1, value)
+            },
+            historyRemove(i) {
+                //  删除历史记录
+                this.historys.splice(i, 1)
+                localStorage.setItem('historySearchValue', JSON.stringify(this.historys))
+            }
+        },
+        directives: {
+            //  进入搜索后立即获取焦点
+            focus: {
+                inserted: function (el) {
+                    el.focus()
+                }
+            }
+        }
+    })
+
+    function open(v) {
+        console.log(JSON.stringify(v))
+        let c = setCreateWindow('accSearchDetail.html', 'accSearchDetail.html', '账户信息')
+        mui.fire(c, 'refresh', {
+            goodsInfo: v
+        });
+    }
+
+    //重写返回逻辑
+    mui.back = function () {
+        let c = plus.webview.getWebviewById('childAccount.html')
+        mui.fire(c, 'ref');
+        plus.webview.currentWebview().close("slide-out-right", 200);
+    }
+
+
+</script>
+
+</html>

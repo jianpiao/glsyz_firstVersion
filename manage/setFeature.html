@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>主推</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../static/css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" href="../static/css/color.css">
+	</head>
+	<style type="text/css">
+		body,
+		html {
+			font-size: .97rem;
+		}
+		
+		header {
+			position: fixed;
+			top: 0;
+			left: 0;
+			height: 50px;
+			width: 100%;
+			background-color: #ffffff;
+			padding: 0 12px;
+			line-height: 50px;
+			z-index: 100;
+			font-weight: 700;
+			box-shadow: 0 1px 2px rgba(0, 0, 0, .1);
+		}
+
+		.mui-table-view {
+			margin-top: 60px;
+		}
+		
+		.mui-table-view-cell {
+			padding: 14px;
+		}
+		
+		.mui-table-view .mui-media-object {
+			max-width: 58px;
+		}
+		
+		.mui-table-view-cell span:nth-child(3) {
+			position: absolute;
+			top: 0;
+			right: 8px;
+			line-height: 49px;
+		}
+		
+		.feature {
+			font-size: 23px;
+			color: #009688;
+		}
+		
+		.price {
+			color: #DD524D;
+		}
+
+		.name {
+			font-weight: 600;
+		}
+	</style>
+
+	<body>
+		<div id="app">
+			<header @click="getAjax()">
+				<span>主推:</span>
+				<span id="featureTotal">{{recNum}}份</span>
+			</header>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell" v-for="(item, index) in items"  @click="updateRecomm(index,item.goods_id, item.goods_name, item.system_category_id, item.shop_goods_category_id, item.goods_price, item.goods_details,item.goods_state,item.recommend)">
+					<span class="name">{{item.goods_name}}</span>
+					<span class="price">&nbsp;￥{{item.goods_price / 100 | priceFilter}}</span>
+					<span class="feature mui-pull-right">{{item.recommend | recomm}}</span>
+				</li>
+			</ul>
+		</div>
+
+	</body>
+	<script src="../static/js/mui.min.js"></script>
+	<script src="../static/js/vue.js"></script>
+	<script type="text/javascript">
+		var vm = new Vue({
+			el: '#app',
+			data: {
+				items: [],
+				recNum: ''
+			},
+			created () {
+				mui.plusReady(function (e) {
+					plus.nativeUI.showWaiting()
+				})
+				this.getAjax()	
+			},
+			methods: {
+				getAjax() {
+					let self = this
+					mui.post(URL + 'GetGoodsList', function (data) {
+						plus.nativeUI.closeWaiting()
+						console.log(data.data)
+						if (data.error == 0) {
+							for (let i in data.data) {
+								if (data.data[i].recommend == 1) {
+									self.recNum++
+								}
+							}
+							self.items = data.data
+						}
+					})
+				},
+				updateRecomm (index,id,name,system_id,shop_id,price,detail,state,rem) {
+					plus.nativeUI.showWaiting();
+					let self = this
+					mui.ajax(URL + 'SetGoodsInfo', {
+						data: {
+							goods_id: id,
+							goods_name: name,
+							system_category_id: system_id,
+							shop_goods_category_id: shop_id,
+							goods_price: price,
+							goods_details: detail,
+							goods_image: '',
+							roll_image: JSON.stringify({}),
+							goods_type: JSON.stringify({}),
+							goods_state: state,
+							recommend: rem == 0 ? 1 : 0
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						success: function(data) {
+							console.log(data.data)
+							if(data.error == 0) {
+								//  判断成功之后就显示√并且让主推总数加一 反之
+								let r = self.items[index].recommend
+								if (r == 0) {
+									self.items[index].recommend = 1
+									self.recNum++
+								} else if (r == 1){
+									self.items[index].recommend = 0
+									self.recNum--
+								}
+								plus.nativeUI.closeWaiting();
+//								plus.nativeUI.toast('修改成功');
+							} else {
+								plus.nativeUI.toast('修改失败');
+							}
+						},
+						error: function(xhr, type, errorThrown) {
+							plus.nativeUI.toast('服务器出错啦！');
+							console.log("总计数据接收异常" + type);
+						}
+					})
+				}
+			},
+			filters: {
+				recomm(value) {
+					return value == 0 ? '' : '√'
+				},
+				priceFilter(v) {
+					v += '';
+					v = v.replace(/[^0-9|\.]/g, ''); //清除字符串中的非数字非.字符  
+					if (/^0+/) //清除字符串开头的0  
+						v = v.replace(/^0+/, '');
+					if (!/\./.test(v)) //为整数字符串在末尾添加.00  
+						v += '.00';
+					if (/^\./.test(v)) //字符以.开头时,在开头添加0  
+						v = '0' + v;
+					v += '00';        //在字符串末尾补零  
+					v = v.match(/\d+\.\d{2}/)[0];
+					return v
+				}
+			}
+		})
+		
+		
+	</script>
+
+</html>

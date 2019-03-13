@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>今天收益</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<!-- <link rel="stylesheet" href="../css/mui.min.css"> -->
+	<link rel="stylesheet" href="../static/fonts/left/iconfont.css">
+	<script src="../static/js/vue.js"></script>
+	<script src="../static/js/mui.min.js"></script>
+</head>
+<style type="text/css">
+	body {
+		margin: 0;
+		background-color: rgba(0, 0, 0, .03)
+	}
+
+	header {
+		width: 100%;
+		background-color: #fafbfa;
+		height: 40px;
+		line-height: 40px;
+		display: flex;
+	}
+
+	header div {
+		font-size: .94rem;
+		width: 50%;
+		margin-left: 12px;
+	}
+
+	header div:nth-child(2) {
+		text-align: right;
+		margin-right: 12px;
+	}
+
+	.today-income {
+		width: 100%;
+		min-height: 100px;
+		padding-top: 12px;
+		padding-bottom: 8px;
+		background-color: #ffffff;
+		box-shadow: 0 1px 1px #dddddd, 0 0 1px #dddddd;
+	}
+
+	.today-income div {
+		display: flex;
+	}
+
+	.his-order-num,
+	.his-order-income {
+		text-align: center;
+	}
+
+	#his-income {
+		font-size: 2.6rem;
+	}
+
+	.his-order-num div,
+	.his-order-income div {
+		height: 50px;
+		line-height: 50px;
+		margin: 0 auto;
+		color: #009688;
+	}
+
+	.chart div,
+	.his-fail div,
+	.order-price div {
+		font-size: .94rem;
+		padding: 0 12px 0 12px;
+		height: 25px;
+		line-height: 25px;
+	}
+
+	.chart div:nth-child(1),
+	.his-fail div:nth-child(1),
+	.order-price div:nth-child(1) {
+		width: 50%;
+	}
+
+	.chart div:nth-child(2),
+	.his-fail div:nth-child(2),
+	.order-price div:nth-child(2) {
+		width: 50%;
+		text-align: right;
+		display: block;
+	}
+
+	footer {
+		margin-top: 12px;
+		width: 100%;
+		/*background-color: #ffffff;*/
+	}
+
+	footer div {
+		background-color: #ffffff;
+	}
+
+	.foot-top {
+		margin-top: 12px;
+		width: 100%;
+		display: flex;
+		border-bottom: 1px solid #eeeeee;
+	}
+
+	.foot-top div {
+		width: inherit;
+		height: 30px;
+		line-height: 30px;
+		color: #212222;
+	}
+
+	.foot-top div:nth-child(1) {
+		margin-left: 12px;
+	}
+
+	.foot-top div:nth-child(2) {
+		text-align: right;
+		margin-right: 12px;
+	}
+
+	.foot-content {
+		position: relative;
+		padding: 12px 0;
+		width: 100%;
+		display: flex;
+	}
+
+	.foot-content div:first-child {
+		width: 40%;
+		overflow: hidden;
+		text-align: center;
+	}
+
+	.foot-content div:nth-child(2) {
+		width: 35%;
+	}
+
+	.foot-content div:nth-child(3) {
+		width: 25%;
+		text-align: right;
+		margin-right: 12px;
+		color: #888888;
+		font-size: .8rem;
+	}
+
+	.foot-content div p {
+		margin: 0;
+		line-height: 23px;
+	}
+
+	img {
+		margin: 0 auto;
+		width: 100px;
+		height: 70px;
+		border-radius: 5px;
+		-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.1) inset;
+		-moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.1) inset;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0px 0px 2px rgba(0, 0, 0, 0.1) inset;
+	}
+
+	.search-food-name {
+		font-size: .94rem;
+		font-weight: 700;
+		overflow: hidden;
+		display: -webkit-box !important;
+		display: -moz-box !important;
+		text-overflow: ellipsis;
+		word-break: break-all;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 1;
+	}
+
+	.search-food-index {
+		color: #DD524D;
+		font-family: '新宋体';
+		font-weight: 700;
+		font-size: .9rem;
+	}
+
+	.search-food-price {
+		margin-right: 7px;
+		font-size: 1rem;
+		/*color: #e62d2d;*/
+	}
+
+	.search-food-flow {
+		font-size: .94rem;
+	}
+
+	.mui-pull-caption {
+		height: 0;
+		display: none;
+	}
+
+	#day {
+		position: fixed;
+		z-index: 10;
+		width: 50%;
+		top: 0;
+		right: 0;
+		height: 40px;
+		outline: none;
+		border: none;
+		margin: 0;
+		text-align: right;
+		font-size: .94rem;
+		opacity: 0;
+	}
+
+	.his-today {
+		text-align: right;
+		padding-right: 15px;
+	}
+</style>
+
+<body>
+	<div id="today">
+		<header id="header">
+			<div>日期</div>
+			<input type="date" id="day" onchange="input(value)">
+			<div class="his-today"></div>
+		</header>
+		<div class="today-income">
+			<div class="his-order-income">
+				<div>
+					<span id="his-income"></span> ￥
+				</div>
+			</div>
+			<div class="his-order-num">
+				<div>
+					<span id="order-quantity"></span>
+					<span class="order-quantity-unit">/单</span>
+				</div>
+			</div>
+			<div class="his-fail">
+				<div>外卖收入</div>
+				<div>
+					<span id="his-out"></span>/￥</div>
+			</div>
+			<div class="his-fail">
+				<div>打包收入</div>
+				<div>
+					<span id="his-pak"></span>/￥</div>
+			</div>
+		</div>
+		<footer>
+			<template>
+				<div v-for="item in items" @click="open(item)">
+					<div class="foot-content">
+						<div>
+							<img :src="item.goods_image | img" />
+						</div>
+						<div>
+							<p class="search-food-name">
+								<span>{{item.goods_name}}</span>
+							</p>
+							<p>
+								<span class="search-food-flow">{{item.number}}</span>
+							</p>
+							<p>
+								<span class="search-food-price">{{item.number*item.goods_price /100 | priceFilter}}</span>
+							</p>
+						</div>
+						<div>
+							<p>商品名</p>
+							<p>日销量</p>
+							<p>收入</p>
+						</div>
+					</div>
+				</div>
+			</template>
+		</footer>
+	</div>
+
+	<script type="text/javascript">
+		//  默认时间
+		var selectTime = formateDate(new Date())
+		mui.init({
+			swipeBack: true,
+			pullRefresh: {
+				container: "#today", //下拉刷新容器标识，querySelector能定位的css选择器均可，比如：id、.class等
+				down: {
+					style: 'circle', //必选，下拉刷新样式，目前支持原生5+ ‘circle’ 样式
+					color: '#2BD009', //可选，默认“#2BD009” 下拉刷新控件颜色
+					height: '70px', //可选,默认50px.下拉刷新控件的高度,
+					range: '130px', //可选 默认100px,控件可下拉拖拽的范围
+					offset: '0px', //可选 默认0px,下拉刷新控件的起始位置
+					auto: true, //可选,默认false.首次加载自动上拉刷新一次
+					callback: pullfresh //必选，刷新函数，根据具体业务来编写，比如通过ajax从服务器获取新数据；
+				}
+			}
+		});
+
+
+		//监听自定义事件
+		document.addEventListener('today', function (e) {
+			//前页传入的数据，直接渲染，无需等待ajax请求详情后
+			selectTime = e.detail.day;
+			getTodayAll(selectTime)
+			todaySale(selectTime)
+		});
+
+
+		//  下拉刷新
+		function pullfresh() {
+			todaySale(selectTime)
+			getTodayAll(selectTime)
+			mui('#today').pullRefresh().endPulldown();
+		}
+
+		//  选择日期
+		function input(value) {
+			//  判断点击了清除就显示当天否则就为设置的日期
+			value = value != '' ? value : formateDate(new Date()) 
+			console.log(value)
+			plus.nativeUI.showWaiting()
+			todaySale(value)
+			getTodayAll(value)
+			selectTime = value
+		}
+
+	
+
+		function formateDate(i) {
+			//  格式化时间
+			let d = new Date(i)
+
+			function tt(v) {
+				if (v < 10) {
+					v = "0" + v
+				}
+				return v
+			}
+			return d.getFullYear()
+				+ "-" + tt((d.getMonth() + 1))
+				+ "-" + tt(d.getDate())
+
+			//  如果点击清除就显示当天
+			document.getElementById('day').value = 	d.getFullYear() + "-" + tt((d.getMonth() + 1)) + "-" + tt(d.getDate())
+		}
+
+
+		//  监听点击了input选择日期
+		document.getElementById('header').addEventListener('tap', function () {
+			document.getElementById('day').click
+		})
+
+
+		var vm = new Vue({
+			el: '#today',
+			data: {
+				items: ''
+			},
+			methods: {
+				open(item) {
+					//	跳转到商品详情页面
+					open_detail(item)
+				}
+			},
+			filters: {
+				img(v) {
+					return v.length > 0 ? PicPath + 'goods_image/' + v : '../img/img.jpg'
+				},
+				priceFilter(v) {
+					return getFloatStr(v)
+				}
+			}
+		})
+
+		window.onload = function () {
+			//从服务器获取数据  
+			todaySale(selectTime)
+			getTodayAll(selectTime)
+			//业务数据获取完毕，并已插入当前页面DOM；  
+			//注意：若为ajax请求，则需将如下代码放在处理完ajax响应数据之后；  
+			mui.plusReady(function () {
+				//关闭等待框  
+				plus.nativeUI.closeWaiting();
+				//显示当前页面  
+				mui.currentWebview.show();
+			});
+		}
+
+		function todaySale(day) {
+			// 今天销售情况
+			mui.ajax(beforePath + shopManagePath + 'TodayStatistics', {
+				data: {
+					date: day
+				},
+				dataType: 'json', //服务器返回json格式数据
+				type: 'post', //HTTP请求类型
+				timeout: 10000, //超时时间设置为10秒；
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				success: function (data) {
+					console.log(data)
+					if (data.error === 0) {
+						document.getElementById('order-quantity').innerText = data.data.shop_flow
+						document.getElementById('his-out').innerText = getFloatStr(data.data.takeout_fee / 100)
+						document.getElementById('his-pak').innerText = getFloatStr(data.data.packing_fee / 100)
+						document.getElementById('his-income').innerText = getFloatStr(data.data.turnover / 100)
+						document.getElementsByClassName('his-today')[0].innerText = data.data.date
+						plus.nativeUI.closeWaiting()
+					} else {
+						document.getElementById('order-quantity').innerText = 0
+						document.getElementById('his-out').innerText = 0
+						document.getElementById('his-pak').innerText = 0
+						document.getElementById('his-income').innerText = 0
+						document.getElementsByClassName('his-today')[0].innerText = 0
+						plus.nativeUI.closeWaiting()
+					}
+
+				},
+				error: function (xhr, type, errorThrown) {
+					console.log("总计数据接收异常" + type);
+				}
+			})
+		}
+
+
+		//  获取今天所有数据列表
+		function getTodayAll(day) {
+			mui.ajax(beforePath + shopManagePath + 'GoodsOneDayStatistics', {
+				data: {
+					date: day
+				},
+				dataType: 'json', //服务器返回json格式数据
+				type: 'get', //HTTP请求类型
+				timeout: 10000, //超时时间设置为10秒；
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				success: function (data) {
+					console.log(data.data)
+					if (data.error == 0) {
+						//  获取数据
+						vm.items = data.data
+					}
+				},
+				error: function (xhr, type, errorThrown) {
+					console.log("总计数据接收异常" + type);
+				}
+			})
+		}
+
+
+		function open_detail(item) {
+			let c = setCreateWindow('today-detail.html', 'today-detail.html', '商品日销量', 'titleNView')
+			mui.fire(c, 'todaDetail', {
+				num: item,
+				day: selectTime
+			});
+			c.show("slide-in-right", 200);
+		}
+
+		//重写返回逻辑
+		mui.back = function () {
+			plus.webview.currentWebview().close("slide-out-right", 200);
+		}
+
+	</script>
+</body>
+
+</html>

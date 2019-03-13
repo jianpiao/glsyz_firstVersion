@@ -1,0 +1,366 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<link href="../static/css/mui.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="../static/css/color.css">
+	<link href="../static/fonts/left/iconfont.css" rel="stylesheet" />
+</head>
+<style type="text/css">
+	body,
+	html {
+		font-size: .95rem;
+	}
+
+	.summary {
+		font-size: 14px;
+		color: #999999;
+		background-color: rgba(0, 0, 0, .03)
+	}
+
+	.mui-table-view-cell span:first-child {
+		color: #6e7977;
+	}
+
+	#orderPrice {
+		color: #EC4B4B;
+	}
+
+	.button {
+		padding: 20px 0;
+		background-color: #fff;
+	}
+
+	#submit {
+		height: 35px;
+		line-height: 35px;
+		width: 85%;
+		font-size: 16px;
+		margin: 20px auto;
+		border-radius: 5px;
+		color: #ffffff;
+	}
+
+	.mui-table-view-cell>a:not(.mui-btn).mui-active {
+		background-color: #ffffff;
+	}
+
+	.mui-table-view-cell > a > div {
+		width: 70%;
+		text-align: right;
+		float: right;
+	}
+</style>
+
+<body>
+	<div id="detail">
+		<ul class="mui-table-view">
+			<li class="mui-table-view-cell summary">
+				<a>
+					<span>订单概括</span>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>系统编号</span>
+					<div id="systemNum"></div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>订单类型</span>
+					<div id="orderType" class="mui-pull-right orderType"></div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>订单状态</span>
+					<div id="orderState"></div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<span>订单备注</span>
+				<div id="remark"></div>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>订单编号</span>
+					<div id="orderId"></div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>下单时间</span>
+					<div id="date"></div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>支付方式</span>
+					<div id="payType"></div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>订单金额</span>
+					<div id="orderPrice"></div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>外卖费用</span>
+					<div id="takeOut"></div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>打包费用</span>
+					<div id="packFee"></div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>联系方式</span>
+					<div id="phone"></div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>联系人</span>
+					<div id="user"></div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>地址(坐位)</span>
+					<div id="address"></div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell summary tail">
+				<a>
+					<span>订单详情</span>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>商品数量</span>
+					<div id="infoLength"></div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>商品名称</span>
+					&nbsp;&nbsp;
+					<div v-for="item in items.order_information" v-text="item.goods_name+'*'+item.number"></div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>商品编号</span>
+					&nbsp;&nbsp;
+					<div v-for="item in items.order_information" v-text="item.goods_id"></div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>商品单价</span>
+					&nbsp;&nbsp;
+					<goods-info v-for="item in items.order_information" :con="item.goods_price / 100 | priceFilter" />
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a>
+					<span>商品套餐</span>
+					&nbsp;&nbsp;
+					<goods-info v-for="item in items.order_information" :con="item.goods_type_name | goodsType" />
+				</a>
+			</li>
+			<div class="mui-button-row button" v-if="backNum == 4">
+				<div id="submit" @touchstart="back = '#05867a'" @touchend="back = '#069687'" :style="{backgroundColor:back}" @click="submit(items.order_id)">接受退单</div>
+			</div>
+		</ul>
+	</div>
+</body>
+
+<script src="../static/js/vue.js"></script>
+<script src="../static/js/mui.min.js"></script>
+<script type="text/javascript">
+
+	//重写返回逻辑
+	mui.back = function () {
+		plus.webview.currentWebview().hide("slide-out-right", 200);
+	}
+
+
+	Vue.component('goods-info', {
+		template: '<div>{{ con }}</div>',
+		props: ['con']
+	})
+
+
+
+	var vm = new Vue({
+		el: '#detail',
+		data: {
+			items: '',
+			back: '',
+			backNum: '',
+			Index: ''
+		},
+		mounted() {
+			mui.plusReady(function () {
+				//关闭等待框
+				plus.nativeUI.closeWaiting();
+			});
+		},
+		methods: {
+			submit(v) {
+				let self = this
+				plus.nativeUI.confirm("确认提交信息", function (e) {
+					if (e.index == 0) {
+						plus.nativeUI.showWaiting();
+						ConfirmBack(self.items.order_id)
+					}
+				})
+			}
+		},
+		filters: {
+			priceFilter(v) {
+				return getFloatStr(v)
+			},
+			goodsType(v) {
+				if (v == '' || null) {
+					return '默认'
+				} else {
+					return v
+				}
+			}
+		}
+	})
+
+
+	//监听其他页面传来的数据
+	document.addEventListener('goodsInfo', function (e) {
+		vm.items = e.detail.num
+		vm.Index = e.detail.index
+		//  获取传值判断是否退单页面过来的
+		vm.backNum = e.detail.num.order_state
+
+		let t = e.detail.num;
+		doc('remark', t.remark)
+		doc('systemNum', t.order_number)
+		doc('orderType', orderType(t.order_type))
+		doc('orderState', orderState(t.order_state))
+		doc('orderId', t.order_id)
+		doc('date', t.date)
+		doc('payType', payState(t.payment_status))
+		doc('orderPrice', getFloatStr(t.basic_price / 100))
+		doc('takeOut', getFloatStr(t.takeout_fee / 100))
+		doc('packFee', getFloatStr(t.packing_fee / 100))
+		doc('phone', t.phone_number)
+		doc('user', t.user_name)
+		doc('address', t.address)
+		doc('infoLength', t.order_information.length)
+		gettype(t.order_type)
+	});
+
+
+	function doc(i,v) {
+		return document.getElementById(i).innerHTML = v
+	}
+
+
+	//  订单类型
+	function orderType(v) {
+		if (v == 1) {
+			return '桌上点餐'
+		} else if (v == 2) {
+			return '预定点餐'
+		} else if (v == 3) {
+			return '线上点餐'
+		} else if (v == 4) {
+			return '前台点餐'
+		} else {
+			v
+		}
+	}
+
+	//  订单状态
+	function orderState(s) {
+		if (s == 1) {
+			return '已下单'
+		} else if (s == 2) {
+			return '已接单'
+		} else if (s == 3) {
+			return '已结单'
+		} else if (s == 4) {
+			return '退单中'
+		} else {
+			return '已退单'
+		}
+	}
+
+	//  订单类型
+	function goodsType(v) {
+		if (v == '' || null) {
+			return '默认'
+		} else {
+			return v
+		}
+	}
+
+	//  支付状态
+	function payState(v) {
+		if (v == 0) {
+			return '未支付'
+		} else if (v == 1) {
+			return '线上支付'
+		} else if (v == 2) {
+			return '已退款'
+		} else {
+			return '商家结算'
+		}
+	}
+
+	//  订单状态颜色
+	function gettype(v) {
+		if (v == 1) {
+			docStyle('#55A532')
+		} else if (v == 2) {
+			docStyle('#6641E2')
+		} else if (v == 3) {
+			docStyle('#41c6c7')
+		} else if (v == 4) {
+			docStyle('#ad32c5')
+		} else {
+			docStyle('#e68932')
+		}
+	}
+
+	function docStyle(i) {
+		return document.getElementById('orderType').style.color = i
+	}
+
+
+	//  退单
+	function ConfirmBack(id) {
+		mui.post(URL + 'ConfirmBack', {
+			order_id: id
+		}, function (data) {
+			if (data.error == 0) {
+				plus.nativeUI.closeWaiting();
+				doc('orderState', orderState(5))
+				plus.nativeUI.toast('退单成功');
+			} else {
+				plus.nativeUI.closeWaiting();
+				plus.nativeUI.toast('退单失败');
+			}
+		})
+	}
+
+</script>
+
+</html>

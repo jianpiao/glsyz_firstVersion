@@ -1,0 +1,217 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<link href="../static/css/mui.min.css" rel="stylesheet" />
+</head>
+<style type="text/css">
+	.chart {
+		height: 200px;
+		margin: 0px;
+		padding: 0px;
+	}
+
+	h5 {
+		margin-top: 30px;
+		font-weight: bold;
+		text-indent: 8px;
+		color: #AAAAAA;
+	}
+
+	h5:first-child {
+		margin-top: 15px;
+	}
+
+	h2 {
+		text-align: center;
+		color: #444444;
+	}
+</style>
+
+<body>
+	<!--<div class="mui-content">
+			<div class="mui-content-padded">
+				<h2> 营业收入和支出详情表</h2>
+			</div>
+			<div class="mui-content-padded">
+				<h5>柱图总计</h5>
+				<div class="chart" id="barChart"></div>
+				<h5>线图总计</h5>
+				<div class="chart" id="lineChart"></div>
+				<h5>饼图示例</h5>
+				<div class="chart" id="pieChart"></div>
+		</div>-->
+	<div id="main" style="width:100%;height:600px;"></div>
+</body>
+<script src="../static/js/mui.min.js"></script>
+<script src="../static/js/echarts-all.js"></script>
+<script type="text/javascript">
+	mui.init({
+		swipeBack: true
+	});
+
+	//		option()
+	var datat = []
+	var datalist = ''
+	var dataNa = []
+	var datava = []
+	let year = new Date().getFullYear()
+	let month = (new Date().getMonth() + 1)
+	let day = new Date().getDate()
+	day = day < 10 ? '0' + day : day
+	month = month < 10 ? '0' + month : month
+	var testTime = new Date().getFullYear() + "-" + month + "-" + day
+
+
+	window.onload = function () {
+		//从服务器获取数据  
+
+		getTodayAll(testTime)
+		//业务数据获取完毕，并已插入当前页面DOM；  
+		//注意：若为ajax请求，则需将如下代码放在处理完ajax响应数据之后；  
+		mui.plusReady(function () {
+			//关闭等待框  
+			plus.nativeUI.closeWaiting();
+			//显示当前页面  
+			mui.currentWebview.show();
+		});
+	}
+
+
+	//重写返回逻辑
+	mui.back = function () {
+		plus.webview.currentWebview().close("slide-out-right", 200);
+	}
+
+	//	菜品某天的销量
+	function getTodayDetail(day, num, na) {
+		console.log(day + " ====" + num + "===" + na)
+		mui.ajax(beforePath + shopManagePath + 'GoodsTodayStatistics', {
+			data: {
+				date: day,
+				goods_id: num
+			},
+			dataType: 'json', //服务器返回json格式数据
+			type: 'post', //HTTP请求类型
+			timeout: 10000, //超时时间设置为10秒；
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			success: function (data) {
+				//					console.log(data.data)
+				if (data.error == 0) {
+					dataNa[num] = na
+					datava[num] = data.data.goods_flow
+					datat[num] = {
+						value: data.data.goods_flow = data.data.goods_flow == 0 ? 1 : data.data.goods_flow + 1,
+						name: na
+					}
+
+					//						console.log(dataNa +" ===="+ datava+"==="+ datat )
+
+					if (datat.length >= datalist) {
+						//							option(datat)
+						var myChart = echarts.init(document.getElementById('main'));
+						options = {
+							title: {
+								text: '',
+								subtext: '',
+								x: 'center'
+							},
+							tooltip: {
+								trigger: 'item',
+								formatter: "{a} <br/>{b} : {c} ({d}%)"
+							},
+							legend: {
+								x: 'center',
+								y: 'bottom',
+								data: dataNa
+							},
+							toolbox: {
+								show: true,
+								feature: {
+									mark: {
+										show: false
+									},
+									dataView: {
+										show: true,
+										readOnly: false
+									},
+									magicType: {
+										show: true,
+										type: ['pie', 'funnel']
+									},
+									restore: {
+										show: true
+									},
+									saveAsImage: {
+										show: false
+									}
+								}
+							},
+							calculable: true,
+							series: [
+
+								{
+									name: '日销量',
+									type: 'pie',
+									radius: [30, 110],
+									center: ['50%', '50%'],
+									roseType: 'area',
+									data: datat
+								}
+							]
+						};
+						// 使用刚指定的配置项和数据显示图表。
+						myChart.setOption(options);
+
+					}
+				} else {
+
+				}
+
+			},
+			error: function (xhr, type, errorThrown) {
+
+				console.log("总计数据接收异常" + type);
+			}
+		})
+	}
+
+	//	商品列表
+	function getTodayAll(day) {
+		mui.ajax(beforePath + shopManagePath + 'GetGoodsList', {
+			data: '',
+			dataType: 'json', //服务器返回json格式数据
+			type: 'get', //HTTP请求类型
+			timeout: 10000, //超时时间设置为10秒；
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			success: function (data) {
+				//					console.log(data.data)
+				if (data.error == 0) {
+					datalist = data.data.length
+					for (let i = 0; i < data.data.length; i++) {
+						let name = data.data[i].goods_name
+						console.log(day)
+						getTodayDetail(day, i, name)
+					}
+
+				} else {
+
+				}
+
+			},
+			error: function (xhr, type, errorThrown) {
+
+				console.log("总计数据接收异常" + type);
+			}
+		})
+	}
+</script>
+
+</html>

@@ -1,0 +1,386 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<link href="../static/css/mui.min.css" rel="stylesheet" />
+	<link href="../static/fonts/left/iconfont.css" rel="stylesheet" />
+</head>
+<style type="text/css">
+	body,
+	html {
+		font-size: 1rem;
+	}
+
+	.search {
+		position: fixed;
+		width: 100%;
+		height: 76px;
+		top: 0;
+		left: 0;
+		background-color: #ffffff;
+		z-index: 100;
+		text-align: center;
+		box-shadow: 0 1px 4px rgba(0, 0, 0, .2);
+	}
+
+	.search>input {
+		width: 93%;
+		margin: 36px auto 8px auto;
+		padding: 0 50px;
+		color: #444444;
+		font-size: 15px;
+		background-color: rgba(0, 0, 0, .07)
+	}
+
+	input[type=search] {
+		text-align: left;
+	}
+
+	.mui-action-back {
+		position: fixed;
+		left: 27px;
+		top: 44px;
+		color: #666666;
+		font-size: 17px;
+	}
+
+	.ok {
+		position: fixed;
+		right: 27px;
+		top: 44px;
+		color: #666666;
+		font-weight: 700;
+	}
+
+	.header {
+		position: fixed;
+		z-index: 100;
+		top: 76px;
+		left: 0;
+		width: 100%;
+		height: 40px;
+		display: flex;
+		background-color: #ffffff;
+		box-shadow: 1px 2px 3px rgba(0, 0, 0, .2);
+		margin-bottom: 10px;
+		overflow: hidden;
+	}
+
+	.header div {
+		width: 100%;
+		height: inherit;
+		line-height: 40px;
+		font-size: 15px;
+		text-align: center;
+	}
+
+	.active {
+		border-bottom: 2px solid #0aa397;
+	}
+
+	.mui-table-view {
+		margin-top: 116px;
+		z-index: 10;
+	}
+
+	.mui-table-view-cell>a>span:nth-child(3) {
+		margin: 8px;
+	}
+
+	.state {
+        float: right;
+        font-size: .89rem;
+        color: #009688;
+    }
+
+	.pname {
+		font-weight: 700;
+		font-size: .95rem;
+		width: 100%;
+		overflow: hidden;
+		display: inline-block;
+		text-overflow: ellipsis;
+	}
+
+	.mui-table-view-cell>a>p,
+	.mui-table-view-cell>a>span:nth-child(3),
+	.mui-table-view-cell>a>span:nth-child(4) {
+		color: #777;
+		font-size: .89rem;
+	}
+
+	.searchFail {
+		position: absolute;
+		width: 100%;
+		top: 150px;
+		font-size: 1rem;
+		color: #888888;
+		z-index: 0;
+	}
+
+	.history {
+		position: absolute;
+		width: 100%;
+		top: 76px;
+		left: 0;
+		z-index: 50;
+		background-color: #ffffff;
+	}
+
+	.history>p {
+		font-size: .91rem;
+		font-weight: 700;
+		padding: 2px 17px;
+		margin: 13px 0 0 0;
+	}
+
+	.view {
+		margin-top: 0 !important;
+	}
+
+	.history-tag {
+		color: #777;
+		font-size: 18px;
+	}
+
+	.history-div {
+		width: calc(100% - 55px);
+		color: #666666;
+		font-size: .92rem;
+		line-height: 20px;
+		padding-left: 8px;
+		overflow: hidden;
+		display: inline-block;
+		text-overflow: ellipsis;
+	}
+
+	.clean {
+		position: absolute;
+		top: 2px;
+		right: 25px;
+		font-weight: 700;
+	}
+
+	.a {
+		display: flex !important;
+	}
+
+	.lis {
+		color: #bbb;
+		font-size: 14px;
+	}
+
+	.icon-fangdajing {
+		font-size: 18px;
+	}
+</style>
+
+<body>
+	<div id="search">
+		<!-- 头部搜索内容 -->
+		<div class="search">
+			<span class="iconfont icon-left mui-action-back"></span>
+			<span class="ok" @click="search">&nbsp;
+				<i class="iconfont icon-fangdajing"></i>
+			</span>
+			<input type="search" value="" v-focus id="input" @keyup.13="search" v-model="searchValue" placeholder="搜索订单号/日期/手机号/用户名" />
+		</div>
+		<header class="header" v-show="showSearchContent">
+			<div @touchstart="select(1)" :class="{'active':currentIndex == 1 }">订单号</div>
+			<div @touchstart="select(2)" :class="{'active':currentIndex == 2 }">日期</div>
+			<div @touchstart="select(3)" :class="{'active':currentIndex == 3 }">手机号码</div>
+			<div @touchstart="select(4)" :class="{'active':currentIndex == 4 }">用户名</div>
+		</header>
+		<template>
+			<!-- 数据列表内容 -->
+			<ul class="mui-table-view" v-show="showSearchContent">
+				<li class="mui-table-view-cell" v-for="(item, index) in items" @click="openWebview(item)">
+					<a>
+						<div class="pname">
+							<span v-for="oname in items[index].order_information">{{ oname.goods_name }}*{{oname.number}}&nbsp;&nbsp;</span>
+						</div>
+						<span class="state">{{item.order_state | orderState}}</span>
+						<p>
+							<span>订单时间 :</span>
+							<span>{{item.date}}</span>
+						</p>
+						<p>
+							<span>总价:</span>
+							<span class="price">￥{{ item.order_price / 100 | priceFilter }}</span>
+						</p>
+					</a>
+				</li>
+			</ul>
+		</template>
+
+		<!-- 历史记录 -->
+		<div class="searchFail" v-show="showSearchContent">
+			<center>未找到相关信息</center>
+		</div>
+		<div class="history" v-show="!showSearchContent">
+			<p>搜索历史</p>
+			<ul class="mui-table-view view">
+				<li class="mui-table-view-cell" v-show="this.historys.length == 0">
+					<span>暂无搜索记录</span>
+				</li>
+				<li class="mui-table-view-cell" v-for="(item, index) in historys" @click="historyIndex(item)">
+					<a class="a">
+						<span class="iconfont icon-lishijilu lis"></span>
+						<span class="history-div" v-text="item"></span>
+						<span class="clean" @click.stop="historyRemove(index)">&#10005;</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</body>
+
+<script src="../static/js/vue.js"></script>
+<script src="../static/js/mui.min.js"></script>
+<script type="text/javascript">
+	//  判断本地的历史记录是否为空
+	var read = JSON.parse(localStorage.getItem('historySearchValue')) == null ? [] : JSON.parse(localStorage.getItem('historySearchValue'))
+
+	var vm = new Vue({
+		el: '#search',
+		data: {
+			items: [],
+			orderNumber: [],
+			orderDate: [],
+			orderPhone: [],
+			orderUserName: [],
+			currentIndex: 1,
+			searchValue: '',
+			showSearchContent: false,
+			historys: read,
+			selected: 1
+		},
+		created() {
+			mui.plusReady(function () {
+				//关闭等待框  
+				plus.nativeUI.closeWaiting();
+			});
+		},
+		methods: {
+			getAjax(v) {
+				//  请求数据
+				let self = this
+				mui.post(URL + 'SearchOrder', {
+					value: v
+				}, function (data) {
+					plus.nativeUI.closeWaiting()
+					if (data.error == 0) {
+						console.log(data.data)
+						self.items = data.data.order_number
+						self.orderNumber = data.data.order_number
+						self.orderDate = data.data.time
+						self.orderPhone = data.data.phone_number
+						self.orderUserName = data.data.user_name
+					}
+				})
+			},
+			//  搜索商品
+			select(i) {
+				this.currentIndex = i
+				if (i == 1) {
+					this.items = this.orderNumber
+				} else if (i == 2) {
+					this.items = this.orderDate
+				} else if (i == 3) {
+					this.items = this.orderPhone
+				} else if (i == 4) {
+					this.items = this.orderUserName
+				}
+			},
+			openWebview(i) {
+				//  打开详情页面
+				open(i)
+			},
+			search() {
+				if (this.searchValue != '') {
+					plus.nativeUI.showWaiting()
+					// 点击搜索或者手机键盘确认按键触发函数
+					this.showSearchContent = true
+					this.currentIndex = 1
+					this.getAjax(1, this.searchValue)
+					//  判断如果不和上次输入的重复就添加到历史搜索记录
+					if (this.searchValue != read[0]) {
+						this.historys.unshift(this.searchValue)
+						localStorage.setItem('historySearchValue', JSON.stringify(this.historys))
+					}
+				}
+			},
+			historyIndex(value) {
+				//  点击历史记录
+				plus.nativeUI.showWaiting()
+				this.showSearchContent = true
+				this.searchValue = value
+				this.currentIndex = 1
+				this.getAjax(value)
+			},
+			historyRemove(i) {
+				//  删除历史记录
+				this.historys.splice(i, 1)
+				localStorage.setItem('historySearchValue', JSON.stringify(this.historys))
+			}
+		},
+		filters: {
+			priceFilter(v) {
+				return getFloatStr(v)
+			},
+			orderState(s) {
+				//  订单状态
+				if (s == 1) {
+					return '已下单'
+				} else if (s == 2) {
+					return '已接单'
+				} else if (s == 3) {
+					return '已结单'
+				} else if (s == 4) {
+					return '退单中'
+				} else {
+					return '已退单'
+				}
+			}
+		},
+		directives: {
+			//  进入搜索后立即获取焦点
+			focus: {
+				inserted: function (el) {
+					el.focus()
+				}
+			}
+		}
+	})
+
+	//  打开商品详情
+	function open(item) {
+		mui.fire(webview_detail, 'goodsInfo', {
+			num: item
+		});
+		webview_detail.show("slide-in-right", 200);
+	}
+
+	//重写返回逻辑
+	mui.back = function () {
+		plus.webview.currentWebview().close("slide-out-right", 200);
+	}
+
+
+	mui.plusReady(function () {
+		//预加载详情页
+		settingTitleNView.titletext = '订单详情'
+		webview_detail = mui.preload({
+			url: 'search-order-detail.html',
+			id: 'search-order-detail.html',
+			styles: settStyle
+		});
+	});
+
+
+</script>
+
+</html>

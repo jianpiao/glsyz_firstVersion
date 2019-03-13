@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../static/css/mui.min.css">
+    <link rel="stylesheet" href="../static/css/color.css">
+    <script src="../static/js/vue.js"></script>
+    <script src="../static/js/mui.min.js"></script>
+    <title>子账户</title>
+</head>
+<style>
+    .mui-table-view-cell p {
+        color: #7c8886;
+        font-size: .94rem;
+        line-height: 30px;
+    }
+
+    .mui-table-view-cell p span {
+        color: #111;
+    }
+
+    .au_block {
+        display: inline-table;
+        width: 100%;
+    }
+
+    .au {
+        float: left;
+        font-size: .8rem;
+        color: #ec9a62;
+        padding: 4px 6px;
+        margin: 0 5px 5px 0;
+        border: 1px solid #ec9a62;
+        text-align: center;
+        border-radius: .7rem;
+    }
+
+    .button {
+        padding: 20px 0;
+        background-color: #fff;
+    }
+
+    #submit {
+        height: 35px;
+        line-height: 35px;
+        width: 85%;
+        font-size: 16px;
+        margin: 20px auto;
+        border-radius: 5px;
+        color: #ffffff;
+    }
+
+    .mui-table-view-cell>a:not(.mui-btn).mui-active {
+        background-color: #ffffff;
+    }
+</style>
+
+<body>
+    <div id="child-account">
+        <template>
+            <ul class="mui-table-view">
+                <li class="mui-table-view-cell" v-for="(item, index) in items" @click="open(item)">
+                    <p>账户名称 :
+                        <span>{{item.account_name}}</span>
+                    </p>
+                    <p>拥有权限 :
+                        <span>{{item.authority.length | auLength}}</span>
+                    </p>
+                    <p>
+                        权限内容 :
+                        <div class="au_block">
+                            <div class="au" v-for="au in item.authority">{{au.authority | auManage}}</div>
+                        </div>
+                    </p>
+                </li>
+                <div class="mui-button-row button">
+                    <div id="submit" @touchstart="back = '#05867a'" @touchend="back = '#069687'" :style="{backgroundColor:back}" @click="submit">添加子管理员</div>
+                </div>
+            </ul>
+        </template>
+    </div>
+
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: '#child-account',
+            data: {
+                items: '',
+                searchValue: '',
+                back: ''
+            },
+            created() {
+                mui.plusReady(function (e) {
+                    plus.nativeUI.showWaiting()
+                })
+                this.getAjax()
+            },
+            methods: {
+                getAjax() {
+                    let self = this
+                    mui.getJSON(URL + 'GetShopAuthorityList', {}, function (data) {
+                        plus.nativeUI.closeWaiting()
+                        if (data.error == 0) {
+                            console.log(JSON.stringify(data.data))
+                            self.items = data.data
+                        }
+                    });
+                },
+                open(v) {
+                    let c = setCreateWindow('childAccountDetail.html', 'childAccountDetail.html', '子管理员信息')
+                    mui.fire(c, 'refresh', {
+                        goodsInfo: v
+                    });
+                },
+                submit() {
+                    mui.openWindow('../index/accSearch.html')
+                }
+            },
+            filters: {
+                auLength(v) {
+                    return v == '' ? 0 + '个' : v + '个'
+                },
+                auManage(v) {
+                    if (v == 1) {
+                        return '订单管理'
+                    } else if (v == 2) {
+                        return '店铺信息管理'
+                    } else if (v == 3) {
+                        return '商品管理'
+                    } else if (v == 4) {
+                        return '统计管理'
+                    } else if (v == 5) {
+                        return '子管理员管理'
+                    } else if (v == 6) {
+                        return '资金管理'
+                    }
+                }
+            }
+        })
+
+        window.addEventListener('ref', function (e) {
+                vm.getAjax()
+            })
+
+        //重写返回逻辑
+        mui.back = function () {
+            plus.webview.currentWebview().close("slide-out-right", 200);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>月走势</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<link rel="stylesheet" href="../static/css/mui.min.css">
+
+	<style>
+		.chart {
+			height: 240px;
+			margin: 0px;
+			padding: 0px;
+		}
+
+		.mui-content-padded {
+			margin: 0;
+		}
+
+		.iconfont {
+			margin-left: 12px;
+			line-height: 44px;
+		}
+
+		.income {
+			width: 100%;
+			padding: 20px 15px 12px 15px;
+			background-color: #fff;
+		}
+
+		.income div {
+			width: 100%;
+			display: block;
+
+		}
+
+		.income div:first-child {
+			font-size: .9rem;
+			color: #777;
+		}
+
+		.income div:nth-child(2) {
+			padding: 20px 0 15px 0;
+		}
+
+		.userIncome {
+			font-size: 2.3rem;
+		}
+
+		.income-buttom {
+			position: relative;
+			padding-top: 12px;
+			/* border-top: 1px solid #eee; */
+			width: 100%;
+			font-size: .9rem;
+		}
+
+		.income-buttom:before {
+			content: '';
+			position: absolute;
+			top: 0;
+			width: 100%;
+			border-top: 1px solid #aaa;
+			-webkit-transform-origin: 0 0;
+			transform-origin: 0 0;
+			-webkit-transform: scaleY(0.3);
+			transform: scaleY(0.3);
+			box-sizing: border-box;
+		}
+
+		.income-buttom span:first-child {
+			float: right;
+		}
+
+		.info {
+			position: relative;
+			margin-top: 12px;
+			padding: 15px 0 5px 0;
+			background-color: #fff;
+		}
+
+		.heading-con {
+			margin: 10px 0 0 23px;
+			font-size: .9rem;
+		}
+
+		.heading-tag {
+			position: absolute;
+			left: 15px;
+			top: 18px;
+			width: 3px;
+			height: 1rem;
+			background-color: #000;
+		}
+
+		.transition {
+			position: relative;
+			margin-top: 12px;
+			padding: 15px 15px;
+			background-color: #fff;
+		}
+
+		.heading-tan {
+			font-size: .9rem;
+			margin-left: 8px;
+		}
+
+		.transition-list {
+			position: relative;
+			height: 50px;
+			line-height: 50px;
+			font-size: .9rem;
+			padding-left: 7px;
+		}
+
+		.right {
+			float: right;
+		}
+
+		.transition-list:before {
+			content: '';
+			position: absolute;
+			top: 50px;
+			width: 100%;
+			border-bottom: 1px solid #aaa;
+			-webkit-transform-origin: 0 0;
+			transform-origin: 0 0;
+			-webkit-transform: scaleY(0.2);
+			transform: scaleY(0.2);
+			box-sizing: border-box;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="mui-content">
+		<div class="income">
+			<div>累计收入</div>
+			<div>
+				￥
+				<span-total class="userIncome" :content="totalIncome | priceFilter"></span-total>
+			</div>
+			<div class="income-buttom">
+				<span-price :content="backPrice | priceFilter"></span-price>
+				<span>未结清金额</span>
+			</div>
+		</div>
+
+		<div class="info">
+			<div class="heading-tag"></div>
+			<span class="heading-con">热销概览</span>
+			<div class="mui-content-padded">
+				<div class="chart" id="pieChart"></div>
+			</div>
+		</div>
+		<div class="transition">
+			<div class="heading-tag"></div>
+			<span class="heading-tan">交易总览</span>
+			<div class="transition-list">
+				<span-price class="right" :content="121.00 | priceFilter"></span-price>
+				<span>线上交易</span>
+			</div>
+			<div class="transition-list">
+				<span-price class="right" :content="121.00 | priceFilter"></span-price>
+				<span>餐桌</span>
+			</div>
+			<div class="transition-list">
+				<span-price class="right" :content="121.00 | priceFilter"></span-price>
+				<span>退款</span>
+			</div>
+			<div class="transition-list">
+				<span-price class="right" :content="0 | priceFilter"></span-price>
+				<span>代金抵扣</span>
+			</div>
+			<div class="transition-list">
+				<span-price class="right" :content="121.00 | priceFilter"></span-price>
+				<span>人工费用</span>
+			</div>
+		</div>
+	</div>
+	<script src="../static/js/vue.js"></script>
+	<script src="../static/js/mui.min.js"></script>
+	<script src="../static/js/echarts-all.js"></script>
+	<script>
+		//重写返回逻辑
+		mui.back = function () {
+			plus.webview.currentWebview().close("slide-out-right", 200);
+		}
+
+
+		window.onload = function () {
+			//从服务器获取数据  
+			// 今天销售情况
+			getAjax()
+			//业务数据获取完毕，并已插入当前页面DOM；  
+			//注意：若为ajax请求，则需将如下代码放在处理完ajax响应数据之后；  
+			mui.plusReady(function () {
+				//关闭等待框  
+				plus.nativeUI.closeWaiting();
+				//显示当前页面  
+				mui.currentWebview.show();
+			});
+		}
+
+
+		//  获取销售最热的数据
+		function getAjax(y) {
+			mui.ajax(beforePath + shopManagePath + 'YearGoodsNumber', {
+				data: {
+					year: new Date().getFullYear()
+				},
+				dataType: 'json', //服务器返回json格式数据
+				type: 'post', //HTTP请求类型
+				timeout: 10000, //超时时间设置为10秒；
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				success: function (data) {
+					// plus.nativeUI.closeWaiting();
+					console.log(data.data)
+					if (data.error == 0) {
+						//  排序
+						data.data = data.data.sort(down)
+
+						//  获取数据
+						vm.items = data.data
+
+						let totalNumber = 0;
+						for (let i in data.data) {
+							totalNumber += data.data[i].number
+							vm.totalIncome += data.data[i].number
+						}
+
+						let dav = []
+						for (let n = 0; n < 5; n++) {
+							dav[n] = { value: data.data[1].number, name: data.data[1].goods_name }
+						}
+						//  图形表
+						var getOption = {
+							tooltip: {
+								trigger: 'item',
+								formatter: "{a} <br/>{b} : {c} ({d}%)"
+							},
+							series: [
+								{
+									name: '名称/份/占比',
+									type: 'pie',
+									radius: ['20%', '50%'],
+									center: ['50%', '50%'],
+									data: dav,
+									itemStyle: {
+										emphasis: {
+											shadowBlur: 10,
+											shadowOffsetX: 0,
+											shadowColor: 'rgba(0, 0, 0, 0.5)'
+										}
+									}
+								}
+							]
+						};
+
+
+						var byId = function (id) {
+							return document.getElementById(id);
+						};
+						var pieChart = echarts.init(byId('pieChart'));
+						pieChart.setOption(getOption);
+
+					} else {
+						vm.items = ''
+					}
+				},
+				error: function (xhr, type, errorThrown) {
+					console.log("总计数据接收异常" + type);
+				}
+			})
+
+			//  退单中
+			mui.ajax(beforePath + shopManagePath + 'GetOrderList2', {
+				data: '',
+				dataType: 'json', //服务器返回json格式数据
+				type: 'post', //HTTP请求类型
+				success: function (data) {
+					console.log(data.data)
+					if (data.error == 0) {
+						for (let i in data.data) {
+							vm.backPrice = data.data[i].order_price / 100
+						}
+					}
+				},
+				error: function (xhr, type, errorThrown) {
+					console.log("总计数据接收异常" + type);
+				}
+			})
+		}
+
+
+		Vue.component('span-price', {
+			template: '<span>￥{{ content }}</span>',
+			props: ['content']
+		})
+
+		Vue.component('span-total', {
+			template: '<span>{{ content }}</span>',
+			props: ['content']
+		})
+
+		var vm = new Vue({
+			el: '.mui-content',
+			data: {
+				items: '',
+				totalIncome: 0,
+				backPrice: 0
+			},
+			filters: {
+				priceFilter(v) {
+					return getFloatStr(v)
+				}
+			}
+		})
+
+
+		//  数组排序
+		function down(x, y) {
+			return (x.number < y.number) ? 1 : -1
+		}
+	</script>
+</body>
+
+</html>

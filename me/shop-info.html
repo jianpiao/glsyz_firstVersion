@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="stylesheet" type="text/css" href="../static/fonts/left/iconfont.css" />
+	<link rel="stylesheet" href="../static/css/mui.min.css">
+	<title>我的</title>
+</head>
+
+<style>
+	body {
+		margin: 0;
+		background-color: rgba(0, 0, 0, .03);
+	}
+
+	::-webkit-scrollbar {
+		display: none;
+	}
+
+	.mui-scrollbar {
+		display: none !important;
+	}
+
+	.header-name {
+		position: relative;
+		width: 100%;
+		height: 160px;
+		border-bottom: 1px solid #ddd;
+		color: #ffffff;
+		display: flex;
+	}
+
+	.header-name>img {
+		height: 160px;
+		width: 100%;
+	}
+
+	.business-pic div img {
+		border: 1px solid #f2eada;
+		background-color: #f6f6f6;
+		-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;
+		-moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0px 0px 20px rgba(0, 0, 0, 0.1) inset;
+	}
+
+	.list-one,
+	.list-two,
+	.list-three {
+		width: 100%;
+		line-height: 28px;
+		background-color: #ffffff;
+	}
+
+	.list-three {
+		margin-bottom: 40px;
+	}
+
+	.sign-top {
+		margin: 40px 0 8px 15px;
+		font-size: .8rem;
+		color: #999999;
+	}
+
+	.sign {
+		margin: 20px 0 5px 15px;
+		font-size: .8rem;
+		color: #999999;
+	}
+
+	.mui-table-view-cell {
+		font-size: .94rem;
+	}
+
+	.mui-pull-right {
+        width: 70%;
+        text-align: right;
+        color: #000;
+        word-wrap: break-word;
+		white-space: normal;
+    }
+
+	.mui-table-view-cell span:first-child {
+		color: #7c8886;
+	}
+
+	.head-pic {
+		position: absolute;
+		top: 120px;
+		right: 20px;
+		width: 80px;
+		height: 80px;
+		overflow: hidden;
+		border-radius: 50%;
+	}
+
+	.head-pic img {
+		width: inherit;
+		height: inherit;
+		display: block;
+	}
+
+	.header > img[img = ''] {
+		display: none;
+	}
+
+	.mui-table-view-cell>a:not(.mui-btn).mui-active {
+        background-color: #ffffff;
+    }
+	
+</style>
+
+<body>
+	<div id="shop-info">
+		<header></header>
+		<div class="header-name">
+			<img :src="items.back_image | backimg" alt="" @click="preview(0)">
+		</div>
+		<div class="head-pic">
+			<img :src="items.shop_image | img" @click="preview(1)"/>
+		</div>
+		<div class="sign-top">信息相关</div>
+		<div class="list-one">
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell">
+					<a>
+						<span>名称</span>
+						<goods-info :c="items.shop_name"></goods-info>
+					</a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a>
+						<span>简介</span>
+						<goods-info :c="items.synopsis"></goods-info>
+					</a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a>
+						<span>编号</span>
+						<goods-info :c="items.shop_id"></goods-info>
+					</a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a>
+						<span>类型</span>
+						<goods-info :c="items.shop_category_name"></goods-info>
+					</a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a>
+						<span>地址</span>
+						<goods-info :c="items.address"></goods-info>
+					</a>
+				</li>
+			</ul>
+		</div>
+		<div class="sign">时间期限</div>
+		<div class="list-three">
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell">
+					<a>
+						<span>状态</span>
+						<goods-info :c="items.shop_state | shopState"></goods-info>
+					</a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a>
+						<span>到期时间</span>
+						<goods-info :c="items.expiration_date"></goods-info>
+					</a>
+				</li>
+			</ul>
+		</div>
+		<canvas style="display: none;"></canvas>
+	</div>
+
+
+	<script src="../static/js/vue.js" type="text/javascript"></script>
+	<script src="../static/js/mui.min.js" type="text/javascript"></script>
+	<script>
+		Vue.component('goods-info', {
+			template: '<div class="mui-pull-right"> {{ c }} </div>',
+			props: ['c']
+		})
+
+		var vm = new Vue({
+			el: '#shop-info',
+			data: {
+				items: ''
+			},
+			mounted() {
+				mui.plusReady(function () {
+					plus.nativeUI.showWaiting()
+				});
+				//  当节点全部挂载完成就渲染
+				this.getAjax()
+			},
+			methods: {
+				getAjax() {
+					let self = this
+					mui.post(URL + 'GetShop', function (data) {
+						plus.nativeUI.closeWaiting()
+						if (data.error == 0) {
+							self.items = data.data
+						}
+					})
+				},
+				preview(i) {
+					// 图片预览
+					let self = this
+					let img = [PicPath + 'shop_back_image/' + self.items.back_image, PicPath + 'shop_image/' + self.items.shop_image]
+					if (img[0] != '' && img[1] != '') {
+						prviewImg(img,i)
+					} else if (i == 0 &&  img[0] == 0) {
+						plus.nativeUI.toast('图片为空。')
+					} else if (i == 1 && img[1] == 0) {
+						plus.nativeUI.toast('图片为空。')
+					} else if (i == 0 && img[0] != '' && img[1] == '') {
+						prviewImg(img[0], 0)
+					} else if (i == 1 && img[0] == '' && img[1] != '') {
+						prviewImg(img[1], 1)
+					}
+				},
+				change(i) {
+					changeHead(i)
+				}
+			},
+			filters: {
+				shopState(v) {
+					return v == 0 ? '停业' : '营业'
+				},
+				img(v) {
+					return PicPath + 'shop_image/' + v
+				},
+				backimg(v) {
+					return PicPath + 'shop_back_image/' + v
+				}
+			}
+		})
+
+
+
+
+		//添加updateHeadImg自定义事件监听
+		window.addEventListener('updateHeadImg', function (e) {
+			//获得事件参数
+			var img = e.detail.img_path;
+			let id = e.detail.num
+			//根据id向服务器请求新闻详情
+			if (img != "") {
+				updataHead(id, img)
+			}
+		});
+
+
+
+		//  图片预览
+		function prviewImg(img,i) {
+			plus.nativeUI.previewImage(img, {
+					current: i,
+					loop: true,
+				});
+		}
+
+	</script>
+</body>
+
+</html>

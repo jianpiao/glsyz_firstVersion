@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>历史</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<link rel="stylesheet" href="../static/css/mui.min.css">
+	<link rel="stylesheet" href="../static/css/color.css">
+	<style>
+		html,
+		body {
+			font-size: .96rem;
+		}
+
+		.finish::after {
+			position: absolute;
+			width: 100%;
+			right: 0;
+			bottom: 0;
+			height: 1px;
+			content: '';
+			-webkit-transform: scaleY(.3);
+			transform: scaleY(.3);
+			background-color: #ccc;
+		}
+
+		.finish {
+			position: relative;
+			width: 100%;
+			background-color: #ffffff;
+			padding: 8px 12px;
+		}
+
+		.finish p {
+			margin: 0;
+		}
+
+		.info {
+			color: #333;
+			font-size: .95rem;
+			font-weight: 600;
+			overflow: hidden;
+			white-space: normal;
+		}
+
+		.finish p:nth-child(2),
+		.finish p:nth-child(3),
+		.order-price {
+			color: #777;
+			font-size: .85rem;
+		}
+
+		#done-order {
+			margin-bottom: 20px;
+		}
+
+		.inter {
+			margin: 0 5px;
+		}
+
+		.empty {
+			position: fixed;
+			top: 20px;
+			width: 100%;
+			height: 60px;
+			line-height: 50px;
+			text-align: center;
+			color: #999;
+			font-size: 1.2rem;
+		}
+
+		.name {
+			font-size: 1rem;
+			color: #000;
+		}
+
+		.order-foot {
+			height: 33px;
+			position: relative;
+		}
+
+		.order-foot div:nth-child(1) {
+			float: left;
+			width: calc(100% - 70px);
+		}
+
+		.order-foot div:nth-child(2) {
+			float: right;
+			width: 52px;
+			height: 32px;
+		}
+
+		.print {
+			color: #fff !important;
+			border: none !important;
+			box-shadow: 0 1px 1px rgba(0, 0, 0, .1), 0 1px 1px rgba(0, 0, 0, .1);
+		}
+
+		.summary {
+			font-size: 14px;
+			color: #999999;
+			background-color: rgba(0, 0, 0, .03)
+		}
+
+		.mui-table-view-cell>a>div {
+			width: 70%;
+			text-align: right;
+			float: right;
+			font-size: .95rem;
+			color: #484b4c;
+			word-wrap: break-word;
+			white-space: normal;
+		}
+
+		.mui-table-view-cell>a>span {
+			color: #6e7977;
+			font-size: .94rem;
+		}
+
+		#orderPrice {
+			color: #EC4B4B;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="done-order">
+		<template>
+			<!-- 头部 -->
+			<center class="empty" v-if="items.length == 0">暂无订单</center>
+			<div class="finish" v-for="item in items" @click="open(item)" v-show="show">
+
+				<p class="info">
+					<span class="name" v-for="info in item.order_information">{{ info.goods_name }}*{{ info.number }}&nbsp;&nbsp;&nbsp;</span>
+				</p>
+				<p>
+					<span>下单时间:</span>
+					&nbsp;
+					<span>{{item.date}}</span>
+				</p>
+				<p>
+					<span class="span">类型:</span>
+					&nbsp;
+					<span class="order-class" style="color: #55A532;" v-if="item.order_type == 1">{{item.order_type | orderType}}</span>
+					<span class="order-class" style="color: #6641E2;" v-else-if="item.order_type == 2">{{item.order_type | orderType}}</span>
+					<span class="order-class" style="color: #41c6c7;" v-else-if="item.order_type == 3">{{item.order_type | orderType}}</span>
+					<span class="order-class" style="color: #ad32c5;" v-else-if="item.order_type == 5">{{item.order_type | orderType}}</span>
+					<span class="order-class" style="color: #e68932;" v-else>{{item.order_type | orderType}}</span>
+					<span v-if="item.order_type == 1" class="inter">|</span>
+					<span v-if="item.order_type == 1" class="addre">坐位&nbsp;{{item.address}}</span>
+				</p>
+				<div class="order-foot">
+					<div>
+						<span class="order-price">总价:</span>
+						&nbsp;
+						<span class="order-price">￥{{item.basic_price /100 | priceFilter}}</span>
+					</div>
+					<div>
+						<input type="button" value="重印" class="print setbgcolor" @click.stop="print(item.order_id,index,item)" />
+					</div>
+				</div>
+			</div>
+
+			<!-- 详情内容 -->
+			<div id="detail" v-show="!show">
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell summary">
+						<a>
+							<span>订单概括</span>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>系统编号</span>
+							<div>{{itemDetail.order_number}}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>订单类型</span>
+							<div class="mui-pull-right orderType" style="color:#55A532" v-if="itemDetail.order_type == 1">{{itemDetail.order_type | orderType}}</div>
+							<div class="mui-pull-right orderType" style="color:#6641E2" v-if="itemDetail.order_type == 2">{{itemDetail.order_type | orderType}}</div>
+							<div class="mui-pull-right orderType" style="color:#41c6c7" v-if="itemDetail.order_type == 3">{{itemDetail.order_type | orderType}}</div>
+							<div class="mui-pull-right orderType" style="color:#ad32c5" v-if="itemDetail.order_type == 4">{{itemDetail.order_type | orderType}}</div>
+							<div class="mui-pull-right orderType" style="color:#e68932" v-if="itemDetail.order_type == 5">{{itemDetail.order_type | orderType}}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>订单状态</span>
+							<div id="orderState">{{itemDetail.order_state | orderState}}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>订单备注</span>
+							<div id="remark">{{itemDetail.remark}}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>订单编号</span>
+							<div id="orderId">{{itemDetail.order_id}}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>下单时间</span>
+							<div id="date">{{itemDetail.date}}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>支付方式</span>
+							<div id="payType">{{itemDetail.payment_status | payState}}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>订单金额</span>
+							<div id="orderPrice">{{itemDetail.basic_price / 100 | priceFilter }}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>外卖费用</span>
+							<div id="takeOut">{{itemDetail.takeout_fee / 100 | priceFilter}}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>打包费用</span>
+							<div id="packFee">{{itemDetail.packing_fee / 100 | priceFilter }}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>联系方式</span>
+							<div id="phone">{{itemDetail.phone_number}}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>联系人</span>
+							<div id="user">{{itemDetail.user_name}}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>地址(坐位)</span>
+							<div id="address">{{itemDetail.address}}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell summary tail">
+						<a>
+							<span>订单详情</span>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>商品数量</span>
+							<div id="infoLength">{{itemDetailLength}}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>商品名称</span>
+							&nbsp;&nbsp;
+							<div v-for="item in itemDetail.order_information">
+								{{item.goods_name}}*{{item.number}}
+							</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>商品编号</span>
+							&nbsp;&nbsp;
+							<div v-for="item in itemDetail.order_information">{{item.goods_id}}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>商品单价</span>
+							&nbsp;&nbsp;
+							<div v-for="item in itemDetail.order_information">{{item.goods_price / 100 | priceFilter}}</div>
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>
+							<span>商品套餐</span>
+							&nbsp;&nbsp;
+							<div v-for="item in itemDetail.order_information">{{item.goods_type_name | goodsType}}</div>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</template>
+
+	</div>
+	<script src="../static/js/vue.js"></script>
+	<script src="../static/js/mui.min.js"></script>
+	<script type="text/javascript" src="../static/js/test.js"></script>
+	<script>
+		var page = 1;
+		var pageNum = false;
+
+
+		var vm = new Vue({
+			el: '#done-order',
+			data: {
+				items: [],
+				itemDetail: '',
+				itemDetailLength: 0,
+				back: '',
+				show: true
+			},
+			created() {
+				mui.plusReady(function (e) {
+					plus.nativeUI.showWaiting()
+				})
+				this.getAjax()
+			},
+			methods: {
+				getAjax() {
+					//  今日已完成订单
+					let self = this
+					mui.getJSON(URL + 'GetOrderList3', {
+						page: page
+					}, function (data) {
+						plus.nativeUI.closeWaiting();
+						//  输出前排序
+						// data.data.data = data.data.data.sort(down)
+						console.log(JSON.stringify(data.data))
+						self.items = data.data.data
+					});
+				},
+				open(i) {
+					this.itemDetail = i
+					this.itemDetailLength = i.order_information.length
+					this.show = !this.show
+				},
+				print(id, index, item) {
+					let self = this
+					plus.nativeUI.confirm("是否打印？", function (e) {
+						if (e.index == 0) {
+							//  点击确认
+							if (plus.plugintest.IsOk() == 'OK') {
+								let Info = localStorage.getItem('shopInfo')
+								plus.plugintest.Print(Info.shopName, Info.shopCard, item);
+							} else {
+								setOpenWindow('../me/print.html', 'print.html', '打印机', 'settingTitleNView')
+							}
+						}
+					}, "打印机", ["确认", "取消"]);
+				},
+			},
+			filters: {
+				priceFilter(v) {
+					return getFloatStr(v)
+				},
+				goodsType(v) {
+					if (v == '' || null) {
+						return '默认'
+					} else {
+						return v
+					}
+				},
+				orderType(v) {
+					//  订单类型
+					if (v == 1) {
+						return '桌上点餐'
+					} else if (v == 2) {
+						return '预定点餐'
+					} else if (v == 3) {
+						return '线上点餐'
+					} else if (v == 4) {
+						return '前台点餐'
+					} else {
+						v
+					}
+				},
+				orderState(s) {
+					//  订单状态
+					if (s == 1) {
+						return '已下单'
+					} else if (s == 2) {
+						return '已接单'
+					} else if (s == 3) {
+						return '已结单'
+					} else if (s == 4) {
+						return '退单中'
+					} else {
+						return '已退单'
+					}
+				},
+				payState(v) {
+					//  支付状态
+					if (v == 0) {
+						return '未支付'
+					} else if (v == 1) {
+						return '线上支付'
+					} else if (v == 2) {
+						return '已退款'
+					} else {
+						return '商家结算'
+					}
+				}
+			}
+		})
+
+
+
+		//  打开详情页面
+		function openDetail(item) {
+			//触发子窗口变更新闻详情
+			let c = setCreateWindow('search-order-detail.html', 'search-order-detail.html', '订单详情', 'settingTitleNView')
+			mui.fire(c, 'searchID', {
+				num: item
+			});
+			plus.nativeUI.showWaiting();
+			c.show("slide-in-right", 200);
+		}
+
+
+		//重写返回逻辑
+		mui.back = function () {
+			if (vm.show == false) {
+				vm.show = !vm.show
+			} else {
+				plus.webview.currentWebview().close("slide-out-right", 200);
+			}
+		}
+
+
+		//  数组排序
+		function down(x, y) {
+			return (x.date < y.date) ? 1 : -1
+		}
+	</script>
+</body>
+
+</html>

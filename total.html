@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>统计</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<link rel="stylesheet" href="static/css/mui.min.css">
+	<link rel="stylesheet" href="static/fonts/left/iconfont.css">
+	<style>
+		.mui-content {
+			margin-top: 70px;
+			font-size: .94rem;
+		}
+
+		.mui-title {
+			line-height: 44px;
+			color: #ffffff;
+		}
+
+		.content {
+			margin-top: 100px;
+		}
+
+		.mui-bar {
+			background-color: #009688;
+		}
+
+		.mounth-list {
+			width: 100%;
+			height: 180px;
+			background-color: #FFFFFF;
+			padding: 2px 12px;
+		}
+
+		.mouth-header {
+			position: relative;
+			display: flex;
+			width: 100%;
+			height: 25px;
+			line-height: 25px;
+		}
+
+		.mouth-header:before {
+			content: '';
+			position: absolute;
+			top: 25px;
+			width: 100%;
+			border-bottom: 1px solid #ccc;
+			-webkit-transform-origin: 0 0;
+			transform-origin: 0 0;
+			-webkit-transform: scaleY(0.3);
+			transform: scaleY(0.3);
+			box-sizing: border-box;
+		}
+
+		.mouth-foot {
+			display: flex;
+			width: 100%;
+			height: 50px;
+			line-height: 25px;
+		}
+
+		.mouth-header div:nth-child(1) {
+			text-align: left;
+			margin-left: 8px;
+			width: 50%;
+		}
+
+		.mouth-header div:nth-child(2) {
+			text-align: right;
+			margin-right: 4px;
+			width: 50%;
+		}
+
+		.mouth-foot div {
+			width: 100%;
+			text-align: center;
+		}
+
+		.mouth-foot span {
+			color: #777777;
+		}
+
+		.mouth-content {
+			width: 100%;
+			height: 100px;
+			text-align: center;
+			color: #009688;
+		}
+
+		.mouth-content div:first-child {
+			padding-top: 6px;
+			height: 60px;
+			line-height: 60px;
+			font-size: 2.6rem;
+		}
+
+		.other-kind {
+			position: relative;
+			height: 40px;
+			line-height: 40px;
+			background-color: #ffffff;
+			text-indent: 15px;
+			margin-top: 11px;
+			overflow: hidden;
+		}
+
+		.other-kind:before {
+			content: '';
+			position: absolute;
+			top: 39px;
+			width: 100%;
+			border-bottom: 1px solid #ccc;
+			-webkit-transform-origin: 0 0;
+			transform-origin: 0 0;
+			-webkit-transform: scaleY(0.3);
+			transform: scaleY(0.3);
+			box-sizing: border-box;
+		}
+
+		.tot-list {
+			width: 100%;
+			height: 100px;
+			background-color: #ffffff;
+			display: flex;
+		}
+
+		.tot-list div {
+			width: 100%;
+			text-align: center;
+		}
+
+		.week {
+			position: relative;
+		}
+
+		.week:before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			height: 100%;
+			border-left: 1px solid #ccc;
+			-webkit-transform-origin: 0 0;
+			transform-origin: 0 0;
+			-webkit-transform: scaleX(0.3);
+			transform: scaleX(0.3);
+			box-sizing: border-box;
+		}
+
+		.week::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			right: 0;
+			height: 100%;
+			border-right: 1px solid #ccc;
+			-webkit-transform-origin: 0 0;
+			transform-origin: 0 0;
+			-webkit-transform: scaleX(0.3);
+			transform: scaleX(0.3);
+			box-sizing: border-box;
+		}
+
+		.today,
+		.week,
+		.mouth {
+			display: block;
+		}
+
+		.today div:nth-child(1),
+		.week div:nth-child(1),
+		.mouth div:nth-child(1) {
+			height: 55px;
+			line-height: 55px;
+		}
+
+		.today div:nth-child(3),
+		.week div:nth-child(3),
+		.mouth div:nth-child(3) {
+			font-size: .8rem;
+			color: #777777;
+		}
+
+		.iconSize {
+			font-size: 38px;
+		}
+
+		.ic1 {
+			font-size: 51px;
+		}
+
+		.ic2 {
+			font-size: 35px;
+		}
+
+		.iconfont {
+			color: #009688;
+		}
+
+		.week-icon {
+			height: 53px;
+			line-height: 59px;
+		}
+
+		.wee {
+			line-height: 62px;
+		}
+
+		#income-week div:nth-child(3),
+		#income-today div:nth-child(3) {
+			color: #777;
+			font-size: .8rem;
+		}
+
+		.search {
+			position: fixed;
+			top: 0;
+			z-index: 100;
+			left: 0;
+			height: 70px;
+			width: 100%;
+			color: #fff;
+			background-color: #009688;
+			text-align: center;
+		}
+
+		.search>span:first-child {
+			font-size: 1rem;
+			line-height: 96px;
+			margin: 0 auto;
+		}
+
+		.icon-fangdajing {
+			position: fixed;
+			top: 37px;
+			right: 14px;
+			color: #fff;
+			font-size: 20px;
+		}
+
+		.icon-14 {
+			font-size: 55px;
+		}
+
+		.icon-yue {
+			font-size: 38px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="search">
+		<span>统计</span>
+		<span class="iconfont icon-fangdajing" onclick="search()"></span>
+	</div>
+	<div id="pullrefresh" class="mui-content">
+		<div class="mui-scroll">
+			<div class="mounth-list">
+				<div class="mouth-header">
+					<div>今日</div>
+				</div>
+				<div class="mouth-content">
+					<div>
+						<span id="mouth-income"></span>
+					</div>
+					<div>日收入/￥</div>
+				</div>
+				<div class="mouth-foot">
+					<div>
+						<span>日单数(单)</span>
+						<div id="mouth-order-num"></div>
+					</div>
+					<div>
+						<span>日销量(件)</span>
+						<div id="mouth-sale-num"></div>
+					</div>
+					<div>
+						<span>查看更多</span>
+						<br/>
+						<span>></span>
+					</div>
+				</div>
+			</div>
+			<div class="other-kind">
+				<div>
+					营收统计
+				</div>
+			</div>
+			<div class="tot-list">
+				<div id="income-week">
+					<div class="week-icon wee">
+						<span class="iconfont icon-14"></span>
+					</div>
+					<div>七天</div>
+					<div>本周营收</div>
+				</div>
+				<div id="income-today">
+					<div class="week-icon">
+						<span class="iconfont icon-yue"></span>
+					</div>
+					<div>本月</div>
+					<div>每月详情</div>
+				</div>
+			</div>
+			<div class="other-kind">
+				<div>
+					数据报表
+				</div>
+			</div>
+			<div class="tot-list">
+				<div class="today" id="goods-today">
+					<div>
+						<i class="iconfont icon-icon3 iconSize"></i>
+					</div>
+					<div>收益</div>
+					<div>营收情况</div>
+				</div>
+				<div class="week" id="goods-week">
+					<div>
+						<i class="iconfont icon-shuju iconSize"></i>
+					</div>
+					<div>数据</div>
+					<div>交易记录</div>
+				</div>
+				<div class="mouth" id="goods-year">
+					<div>
+						<i class="iconfont icon-iconfont-guifan-fubenzhuanhuan iconSize"></i>
+					</div>
+					<div>合计</div>
+					<div>全部总结</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="static/js/mui.min.js"></script>
+	<script type="text/javascript">
+		mui.init();
+
+		//  今日数据
+		mui.ajax(beforePath + shopManagePath + 'TodayStatistics', {
+			data: {
+				year: new Date().getFullYear(),
+				month: new Date().getMonth() + 1
+			},
+			dataType: 'json', //服务器返回json格式数据
+			type: 'post', //HTTP请求类型
+			timeout: 10000, //超时时间设置为10秒；
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			success: function (data) {
+				console.log(data)
+				if (data.error === 0) {
+					document.getElementById('mouth-order-num').innerText = data.data.shop_flow
+					document.getElementById('mouth-income').innerText = getFloatStr(data.data.turnover / 100)
+					document.getElementById('mouth-sale-num').innerText = data.data.number_of_goods
+				} else {
+					document.getElementById('mouth-order-num').innerText = 0
+					document.getElementById('mouth-income').innerText = 0
+					document.getElementById('mouth-sale-num').innerText = 0
+				}
+
+			},
+			error: function (xhr, type, errorThrown) {
+				console.log("总计数据接收异常" + type);
+			}
+		})
+
+		//  搜索
+		var settimeaa = 0
+		function search() {
+			settimeaa++
+			if (settimeaa < 2) {
+				plus.webview.open('index/search.html', 'search.html', {}, 'slide-in-right', 200);
+				setTimeout(() => {
+					settimeaa = 0
+				}, 1500);
+			}
+		}
+
+
+		//  今天营收
+		document.getElementsByClassName('mouth-foot')[0].addEventListener('tap', function () {
+			setCreateWindow('total/today.html', 'today.html', '今日收益','titleNView')
+			plus.nativeUI.showWaiting();
+		})
+
+		//  本月商品
+		document.getElementById('income-today').addEventListener('tap', function () {
+			setCreateWindow('total/mouth.html',  'mouth.html', '本月收益', 'titleNView')
+			plus.nativeUI.showWaiting();
+		})
+
+		//  本周
+		document.getElementById('income-week').addEventListener('tap', function () {
+			setCreateWindow('total/week.html', 'week.html', '本周详情', 'titleNView')
+			plus.nativeUI.showWaiting();
+		})
+
+		//  收益
+		document.getElementById('goods-today').addEventListener('tap', function () {
+			setCreateWindow('total/income.html', 'income.html', '收益', 'titleNView')
+			plus.nativeUI.showWaiting();
+		})
+
+
+		//  本周商品
+		document.getElementById('goods-week').addEventListener('tap', function () {
+			setCreateWindow('total/transactions.html', 'transactions.html', '交易记录', 'titleNView')
+			plus.nativeUI.showWaiting();
+		})
+
+		//  年
+		document.getElementById('goods-year').addEventListener('tap', function () {
+			setCreateWindow('total/year.html', 'year.html', '合计', 'titleNView')
+			plus.nativeUI.showWaiting();
+		})
+	</script>
+</body>
+
+</html>

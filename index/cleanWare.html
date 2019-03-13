@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../static/css/mui.min.css">
+    <link rel="stylesheet/less" type="text/css" href="style.css">
+    <link rel="stylesheet" href="../static/css/color.css">
+    <script src="../static/js/vue.js"></script>
+    <script src="../static/js/mui.min.js"></script>
+    <title>收拾餐具</title>
+</head>
+<style>
+    .header {
+        padding: 6px 12px;
+    }
+
+    .header span:nth-child(3) {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .cleanAll {
+        float: right;
+        padding: 4px 5px;
+        color: #666;
+    }
+
+    .container {
+        width: 95%;
+        margin: 0 auto;
+    }
+
+    .waterfall {
+        -moz-column-count: 3;
+        /* Firefox */
+        -webkit-column-count: 3;
+        /* Safari 和 Chrome */
+        column-count: 3;
+        -moz-column-gap: 10px;
+        -webkit-column-gap: 10px;
+        column-gap: 10px;
+    }
+
+    .item {
+        padding: 10px;
+        margin: 0 0 12px 0;
+        color: #fff;
+        text-align: center;
+        -moz-page-break-inside: avoid;
+        -webkit-column-break-inside: avoid;
+        break-inside: avoid;
+        border: 1px solid #0aa384;
+        background-color: #0aa384;
+    }
+
+    .item img {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+</style>
+
+<body>
+    <div id="cleanWare">
+        <template>
+            <p class="header">
+                <span class="cleanAll" @click="cleanWare" v-show="items.length != 0">收完全部> </span>
+                <span>待收餐具数量</span>
+                <span>{{ total }}</span>
+                <span>份</span>
+            </p>
+            <div class="container">
+                <div class="waterfall" >
+                    <div class="item" v-for="(item, index) in items" @click="cleanOne(index)">
+                        <span>
+                            餐具位置 {{ item.address }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+
+    <script>
+        var vm = new Vue({
+            el: '#cleanWare',
+            data: {
+                items: [],
+                total: ''
+            },
+            created() {
+                mui.plusReady(function (e) {
+                    plus.nativeUI.showWaiting()
+                })
+                this.getAjax()
+            },
+            methods: {
+                getAjax() {
+                    let self = this
+                    mui.post(URL + 'CollectTableware', function (data) {
+                        // console.log(data.data.list)
+                        self.total = data.data.count
+                        self.items = data.data.list
+                        plus.nativeUI.closeWaiting()
+                    });
+                },
+                cleanWare(i) {
+                    let self = this
+                    mui.post(URL + 'CollectTablewareZero', {
+                        list: JSON.stringify(i)
+                    }, function (data) {
+                        if (data.error == 0) {
+                            plus.nativeUI.toast("餐具已收完！")
+                        }
+                    });
+                },
+                cleanOne(i) {
+                    this.cleanWare(i)
+                }
+            }
+        })
+    </script>
+
+</body>
+
+</html>

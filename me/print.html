@@ -1,0 +1,98 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<meta name="HandheldFriendly" content="true" />
+	<meta name="MobileOptimized" content="320" />
+	<title>广理商业街</title>
+	<link rel="stylesheet" href="../static/css/mui.min.css">
+	<script type="text/javascript" src="../static/js/common.js"></script>
+	<script type="text/javascript" src="../static/js/test.js"></script>
+	<script type="text/javascript" src="../static/js/mui.min.js"></script>
+	<script type="text/javascript">
+		var bluList;
+
+		//重写返回逻辑
+		mui.back = function () {
+			plus.webview.currentWebview().close("slide-out-right", 200);
+		}
+
+		function BluetoothPairing() {
+			plus.plugintest.BluetoothPairing();
+		}
+
+		function ReturnBluetoothDevice() {
+			plus.plugintest.ReturnBluetoothDevice(function (result) {
+
+				bluList = result;
+
+				var list = [];
+				for (var i = 0; i < result.length; i++) {
+					list.push({
+						title: result[i].name
+					});
+				}
+
+				if (list.length > 0) {
+					// 弹出系统选择按钮框
+					plus.nativeUI.actionSheet({
+						title: "蓝牙设备选择",
+						cancel: "取消",
+						buttons: list
+					}, function (e) {
+						console.log("User pressed: " + e.index);
+						localStorage.setItem('localSeleceBlusDevice', bluList[e.index - 1].address)
+						plus.plugintest.SetBluetooth(bluList[e.index - 1].address);
+					});
+				} else {
+					plus.nativeUI.toast("当前没有配对的设备");
+				}
+
+				//alert(JSON.stringify(result));
+			}, function (result) {
+				alert(result)
+			});
+		}
+
+		function Test() {
+			plus.plugintest.Test();
+		}
+
+		function Print() {
+			plus.plugintest.Print("测试", "无支付", JSON.parse('{"order_id":224,"shop_every_id":"E00031","order_number":"I3A5100608829E0003149","order_information":[{"order_goods_id":206,"shop_id":1,"order_id":224,"goods_id":36,"goods_name":"可乐鸡翅","goods_type":0,"goods_type_name":"","goods_price":1000,"number":1,"total":1000,"date":"2018-03-10 11:03:26","system_category_id":1,"shop_goods_category_id":1,"goods_details":"可不可以快乐吃鸡的翅膀","goods_image":"20180203/1517588793309.png","recommend":1,"goods_state":2,"up_time":"2018-02-03 00:26:36"}],"basic_price":1000,"packing_fee":0,"takeout_fee":0,"order_price":1000,"address":"鼎湖校区4栋11508","date":"2018-03-10 11:03:26","take_data":null,"order_type":4,"travel_position":0,"payment_status":4,"order_state":1,"time_end":null,"user_name":"Cabbagelol","phone_number":"13215389619","remark":""}'));
+		}
+
+
+
+	</script>
+</head>
+<style type="text/css">
+	.button {
+		width: 85%;
+		height: 40px;
+		line-height: 40px;
+		margin: 25px auto;
+		background-color: #00897B;
+		color: #ffffff;
+		font-family: 'Microsoft YaHei';
+		border-radius: 7px;
+		text-align: center;
+	}
+</style>
+
+<body>
+	<header>
+	</header>
+	<div id="dcontent" class="dcontent">
+		<br/>
+		<div class="button" id="mate" onclick="BluetoothPairing()">配对蓝牙</div>
+		<div class="button" id="setting" onclick="ReturnBluetoothDevice()">设置蓝牙</div>
+		<div class="button" id="test" onclick="Test()">测试蓝牙</div>
+		<div class="button" id="print" onclick="Print()">打印</div>
+		<br/>
+	</div>
+</body>
+
+</html>

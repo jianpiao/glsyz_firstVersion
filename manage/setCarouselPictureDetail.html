@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../static/css/mui.min.css">
+    <link rel="stylesheet" href="../static/css/color.css">
+    <script src="../static/js/vue.js"></script>
+    <script src="../static/js/mui.min.js"></script>
+    <title>轮播图片详情</title>
+</head>
+<style>
+    img {
+        width: 50px;
+    }
+
+    .detail-img {
+        background-color: #fff;
+        color: #777;
+        height: 40px;
+        padding: 8px 15px;
+        margin: 0;
+    }
+
+    .button {
+        padding: 20px 0;
+        background-color: #fff;
+    }
+
+    #add {
+        height: 35px;
+        line-height: 35px;
+        width: 85%;
+        margin: 0 auto;
+        border-radius: 5px;
+        border: 1px solid #dddddd;
+        background-color: #fff;
+        color: #111;
+    }
+
+    #submit {
+        height: 35px;
+        line-height: 35px;
+        width: 85%;
+        margin: 20px auto;
+        border-radius: 5px;
+        color: #ffffff;
+    }
+
+    .detail {
+        color: #333;
+        font-size: .92rem;
+        width: 70%;
+        float: left;
+    }
+
+    .mui-table-view-cell.mui-active {
+        background-color: #fff;
+    }
+
+    .mui-table-view-cell {
+        position: relative;
+        padding-bottom: 29px;
+    }
+
+    .delete {
+        position: absolute;
+        font-size: .77rem;
+        border: 1px solid rgba(212, 85, 85, 0.884);
+        text-align: center;
+        line-height: 26px;
+        color: rgba(212, 85, 85, 0.884);
+        border-radius: 5px;
+        width: 40px;
+        height: 25px;
+        bottom: 4px;
+        left: 15px;
+    }
+
+    .err {
+        line-height: 50px;
+        height: 50px;
+        width: 100%;
+        font-size: 1rem;
+        color: #999;
+        text-align: center;
+    }
+</style>
+
+
+<div id="pic">
+    <template>
+        <ul class="mui-table-view">
+            <p class="err" v-if="items[inde].roll_image.length == 0">暂无轮播图片</p>
+            <li class="mui-table-view-cell" v-for="(item,index) in items[inde].roll_image">
+                <div class="delete" @click="del(index)">删除</div>
+                <div class="detail" @click="content(index,item.goods_roll_synopsis)">{{item.goods_roll_synopsis | con}}</div>
+                <img :src="item.goods_roll_image | img" alt="" class="mui-pull-right" @click.stop="check(index)">
+            </li>
+            <div class="mui-button-row button">
+                <div id="add" @touchstart="backAdd = '#f7f7f7'" @touchend="backAdd = '#ffffff'" :style="{backgroundColor:backAdd}" @click="add">添加</div>
+                <div id="submit" @touchstart="back = '#05867a'" @touchend="back = '#0aa394'" :style="{backgroundColor:back}" @click="submit">确认</div>
+            </div>
+        </ul>
+    </template>
+</div>
+</body>
+<script>
+
+    var vm = new Vue({
+        el: '#pic',
+        data: {
+            items: [],
+            back: '',
+            backAdd: '',
+            backSub: '',
+            inde: ''
+        },
+        created() {
+            mui.plusReady(function () {
+                //关闭等待框  
+                plus.nativeUI.closeWaiting();
+            });
+        },
+        methods: {
+            setAjax() {
+                let self = this
+                let i = this.inde
+                let im = self.items[i].roll_image
+                for(let n in im) {
+                    if (im[n].goods_roll_image == '') {
+                        im[n].goods_roll_image = 'index.jpg'
+                    }
+                }
+                
+
+                plus.nativeUI.showWaiting();
+                mui.post(URL + 'SetGoodsInfo', {
+                    goods_id: self.items[i].goods_id,
+                    goods_name: self.items[i].goods_name,
+                    system_category_id: self.items[i].system_category_id,
+                    shop_goods_category_id: self.items[i].shop_goods_category_id,
+                    goods_price: self.items[i].goods_price,
+                    goods_details: self.items[i].goods_details,
+                    goods_image: self.items[i].goods_image,
+                    roll_image: JSON.stringify(self.items[i].roll_image),
+                    goods_type: JSON.stringify(self.items[i].goods_type),
+                    goods_state: self.items[i].goods_state,
+                    recommend: self.items[i].recommend
+                }, function (data) {
+                    console.log(data.data)
+                    plus.nativeUI.closeWaiting();
+                    if (data.error == 0) {
+                        plus.nativeUI.toast('修改成功');
+                        //  返回刷新父级页面
+                        let view = plus.webview.getWebviewById("setCarouselPicture.html");
+                        mui.fire(view, 'refr', {
+                            inputVal: self.items
+                        });
+                        plus.webview.currentWebview().close("slide-out-right", 200);
+                    } else {
+                        plus.nativeUI.toast('修改失败');
+                    }
+                })
+            },
+            check(index) {
+                //  上传图片
+                updataPicture(index)
+            },
+            del(i) {
+                //  删除节点
+                this.items[this.inde].roll_image.splice(i, 1)
+            },
+            add() {
+                //  添加节点
+                addDom("add")
+            },
+            submit() {
+                //  提交内容
+                let i = this.inde
+                this.items[i].roll_image.length > 0 ? this.setAjax() : mui.back()
+            },
+            content(index, con) {
+                // 弹出输入对话框
+                let self = this
+                plus.nativeUI.prompt("内容", function (e) {
+                    if (e.index == 0) {
+                        self.items[self.inde].roll_image[index].goods_roll_synopsis = e.value
+                    };
+                }, "填写介绍", con, ["确定", "取消"]);
+            }
+        },
+        filters: {
+            img(v) {
+                return v != '' ? PicPath + 'goods_image/' + v : '../img/b1.jpg'
+            },
+            con(c) {
+                return c == '' ? '填写内容...' : c
+            }
+        }
+    })
+
+    //监听自定义事件，获取新闻详情
+    document.addEventListener('carouseID', function (e) {
+        //前页传入的数据，直接渲染，无需等待ajax请求详情后
+        vm.items = e.detail.num;
+        vm.inde = e.detail.index
+
+    });
+
+    //添加updateHeadImg自定义事件监听
+    window.addEventListener('updateHeadImg', function (e) {
+        //获得事件参数
+        var img = e.detail.img_path;
+        let id = e.detail.num
+        //根据id向服务器请求新闻详情
+        if (img != "") {
+            updataHead(id, img)
+        }
+    });
+
+
+    //重写返回逻辑
+    mui.back = function () {
+        plus.webview.currentWebview().close("slide-out-right", 200);
+    }
+
+
+
+    /*设置商品图片*/
+    function updataPicture(i) {
+        if (mui.os.plus) {
+            var a = [{
+                title: "拍照"
+            }, {
+                title: "从手机相册选择"
+            }, {
+                title: '预览图片'
+            }];
+            plus.nativeUI.actionSheet({
+                cancel: "取消",
+                buttons: a
+            }, function (b) { /*actionSheet 按钮点击事件*/
+                switch (b.index) {
+                    case 0:
+                        break;
+                    case 1:
+                        getImage(i); /*拍照*/
+                        break;
+                    case 2:
+                        galleryImg(i); /*打开相册*/
+                        break;
+                    case 3:
+                        previewImage(i)/*预览图片*/
+                        break;
+                    default:
+                        break;
+                }
+            })
+        }
+    }
+
+    /*设置商品图片*/
+    function addDom(i) {
+        if (mui.os.plus) {
+            var a = [{
+                title: "拍照"
+            }, {
+                title: "从手机相册选择"
+            }];
+            plus.nativeUI.actionSheet({
+                cancel: "取消",
+                buttons: a
+            }, function (b) { /*actionSheet 按钮点击事件*/
+                switch (b.index) {
+                    case 0:
+                        break;
+                    case 1:
+                        getImage(i); /*拍照*/
+                        break;
+                    case 2:
+                        galleryImg(i); /*打开相册*/
+                        break;
+                    default:
+                        break;
+                }
+            })
+        }
+    }
+
+
+
+
+    // 图片预览
+    function previewImage(index) {
+        if (vm.items[vm.inde].roll_image[index].goods_roll_image != '') {
+            plus.nativeUI.previewImage([
+                PicPath + 'goods_image/' + vm.items[vm.inde].roll_image[index].goods_roll_image
+            ], {
+                    current: 0,
+                    loop: true,
+                });
+        } else {
+            plus.nativeUI.toast("图片为空。")
+        }
+    }
+
+    //拍照
+    function getImage(i) {
+        var cmr = plus.camera.getCamera();
+        var res = cmr.supportedImageResolutions[0];
+        var fmt = cmr.supportedImageFormats[0];
+        cmr.captureImage(function (path) {
+            //plus.io.resolveLocalFileSystemURL(path, function(entry) {  
+            plus.io.resolveLocalFileSystemURL(path, function (entry) {
+                var localUrl = entry.toLocalURL() + "?version=" + new Date().getTime();
+                // cutImage(localUrl,i)
+                plus.nativeUI.showWaiting();
+                updataHead(i, localUrl);
+            }, function (err) {
+                console.error("拍照失败：" + err.message);
+            }, {
+                    index: 1
+                });
+        });
+    }
+
+    //本地相册选择
+    function galleryImg(i) {
+        plus.gallery.pick(function (a) {
+            plus.io.resolveLocalFileSystemURL(a, function (entry) {
+                plus.io.resolveLocalFileSystemURL("_doc/", function (root) {
+                    root.getFile("head.png", {}, function (file) {
+                        //文件已存在
+                        file.remove(function () {
+                            console.log("file remove success");
+                            entry.copyTo(root, 'head.png', function (e) {
+                                plus.nativeUI.showWaiting();
+                                let path = e.fullPath + "?version=" + new Date().getTime();
+                                updataHead(i, path); /*上传图片*/
+                                // cutImage(path,i)
+                                plus.nativeUI.showWaiting();
+                                //变更大图预览的src
+                                //目前仅有一张图片，暂时如此处理，后续需要通过标准组件实现
+                            }, function (e) {
+                                console.log('copy image fail:' + e.message);
+                            });
+                        }, function () {
+                            console.log("delete image fail:" + e.message);
+                        });
+                    }, function () {
+                        //文件不存在
+                        entry.copyTo(root, 'head.png', function (e) {
+                            plus.nativeUI.showWaiting();
+                            let path = e.fullPath + "?version=" + new Date().getTime();
+                            updataHead(i, path); /*上传图片*/
+                            //  cutImage(path,i)
+                            plus.nativeUI.showWaiting();
+                        }, function (e) {
+                            console.log('copy image fail:' + e.message);
+                        });
+                    });
+                }, function (e) {
+                    console.log("get _www folder fail");
+                })
+            }, function (e) {
+                console.log("读取拍照文件错误：" + e.message);
+            });
+        }, function (a) { }, {
+                filter: "image"
+            })
+    };
+
+    //上传商品图片
+    function updataHead(index, imgPath) {
+        var image = new Image();
+        image.src = imgPath;
+        image.onload = function () {
+            var imgData = getBase64Image(image);
+            //  图片上传
+            mui.ajax({
+                url: URL + 'UpRollImage',
+                type: 'POST',
+                data: {
+                    image: imgData,
+                    synopsis: index != 'add' ? vm.items[vm.inde].roll_image[index].goods_roll_synopsis : ''
+                },
+                dataType: 'json', //服务器返回json格式数据
+                timeout: 10000, //超时时间设置为10秒；	
+                success: function (returndata) {
+                    if (returndata.error == 0) {
+                        if (index == 'add') {
+                            //  如果是添加图片就在数组里面添加一个子数组
+                            plus.nativeUI.closeWaiting();
+                            vm.items[vm.inde].roll_image.push({
+                                goods_roll_id: returndata.data.goods_roll_id,
+                                goods_roll_image: returndata.data.image,
+                                goods_roll_synopsis: ''
+                            })
+                        } else {
+                            //  如果是更新图片就更新对应的图片路径
+                            plus.nativeUI.closeWaiting();
+                            vm.items[vm.inde].roll_image[index].goods_roll_image = returndata.data.image
+                            vm.items[vm.inde].roll_image[index].goods_roll_id = returndata.data.goods_roll_id
+                            plus.nativeUI.toast('上传成功');
+                        }
+                    } else {
+                        plus.nativeUI.toast('上传失败' + returndata.error);
+                    }
+                },
+                error: function (returndata) {
+                    plus.nativeUI.toast('图片太大，请重新上传，或更换图片。');
+                }
+            });
+        }
+    }
+
+    //将图片压缩转成base64
+    function getBase64Image(img) {
+        var canvas = document.createElement("canvas");
+        canvas.getAttribute('class', 'var canvas')
+        // var canvas = document.getElementsByTagName('var canvas');
+        var width = img.width;
+        var height = img.height;
+
+        canvas.width = 600; /*设置新的图片的宽度*/
+        canvas.height = height / (width / 600); /*设置新的图片的长度*/
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, img.x, img.y, 600, height / (width / 600)); /*绘图*/
+        var dataURL = canvas.toDataURL("image/png");
+        return dataURL
+    }
+</script>
+</body>
+
+</html>

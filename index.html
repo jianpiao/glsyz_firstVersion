@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<link rel="stylesheet" type="text/css" href="static/css/mui.min.css" />
+	<link rel="stylesheet" href="static/css/color.css">
+	<link rel="stylesheet" type="text/css" href="static/fonts/left/iconfont.css" />
+	<title>首页</title>
+</head>
+
+<style>
+	.mui-bar-tab {
+		background-color: #fff !important;
+		/* box-shadow:0 1px 2px rgba(0, 0, 0, 0.3), 0px 0px 12px rgba(0, 0, 0, 0.2) !important; */
+	}
+
+	.mui-title,
+	.mui-icon-search {
+		color: #ffffff;
+	}
+
+	.mui-tab-label {
+		height: .75rem;
+		font-size: .75rem;
+	}
+
+	p {
+		margin: 0;
+		padding: 0;
+	}
+
+	.iconfont {
+		font-size: 23px;
+	}
+</style>
+
+<style>
+</style>
+
+<body>
+	<nav class="mui-bar mui-bar-tab">
+		<a id="defaultTab" class="mui-tab-item mui-active" href="newOrder.html">
+			<p class="iconfont icon-zuixin"></p>
+			<p class="mui-tab-label">最新订单</p>
+		</a>
+		<a class="mui-tab-item" href="manage.html">
+			<p class="iconfont icon-shangpinguanliicon"></p>
+			<p class="mui-tab-label">管理</p>
+		</a>
+		<a class="mui-tab-item" href="total.html">
+			<p class="iconfont icon-tongji"></p>
+			<p class="mui-tab-label">统计</p>
+		</a>
+		<a class="mui-tab-item" href="me.html">
+			<p class="iconfont icon-wo"></p>
+			<p class="mui-tab-label">我的</p>
+		</a>
+	</nav>
+</body>
+
+</html>
+
+<script src="static/js/mui.min.js"></script>
+<script>
+	mui.init();
+
+
+	//  返回键处理
+	mui.oldBack = mui.back;
+	var backButtonPress = 0;
+	mui.back = function (event) {
+
+		backButtonPress++;
+		if (backButtonPress > 1) {
+			plus.runtime.quit();
+		} else {
+			plus.nativeUI.toast('再按一次退出应用');
+		}
+		setTimeout(function () {
+			backButtonPress = 0;
+		}, 1000);
+		return false;
+	};
+
+	var subpages = ['newOrder.html', 'manage.html', 'total.html', 'me.html']
+	var subpage_style = {
+		render: "always",
+		popGesture: "hide",
+		bounce: "none",
+		top: '0',
+		bottom: '50px',
+		scrollIndicator: 'none'
+	};
+
+	var aniShow = {};
+
+	// 创建子页面，首个选项卡页面显示，其它均隐藏；
+	mui.plusReady(function () {
+		var self = plus.webview.currentWebview();
+		titleNView.autoBackButton = false
+		var temp = {};
+		var sub = '';
+		for (var i = 0; i < 4; i++) {
+
+			if (i == 0) {
+				// titleNView.titletext = '最新订单'
+				// titleNView.buttons = [{ 'text': '🔍', 'color': '#cccccc', 'float': 'right', onclick: clickButton }]
+				sub = plus.webview.create('newOrder.html', 'newOrder.html', subpage_style)
+				temp[subpages[i]] = "true";
+				mui.extend(aniShow, temp);
+			} else if (i == 1) {
+				// titleNView.titletext = '管理'
+				sub = plus.webview.create('manage.html', 'manage.html', subpage_style)
+				sub.hide();
+			} else if (i == 2) {
+				// titleNView.titletext = '统计'
+				sub = plus.webview.create('total.html', 'total.html', subpage_style)
+				sub.hide();
+			} else if (i == 3) {
+				sub = plus.webview.create('me.html', 'me.html', {
+					'titleNView': {
+						'backgroundcolor': '#009688',
+						'titletext': '我的',
+						'titlecolor': '#ffffff',
+						'type': 'transparent' //透明渐变样式
+					},
+					"render": "always",
+					"popGesture": "hide",
+					"bounce": "none",
+					'top': '0',
+					'bottom': '50px',
+					'scrollIndicator': 'none'
+				});
+				sub.hide();
+			}
+			self.append(sub);
+		}
+	});
+
+	//当前激活选项
+	var activeTab = subpages[0];
+
+	//选项卡点击事件
+	document.addEventListener('plusready', function () {
+		mui('.mui-bar-tab').on('tap', 'a', function (e) {
+			var targetTab = this.getAttribute('href');
+			if (targetTab == activeTab) {
+				return;
+			}
+			//显示目标选项卡
+			//若为iOS平台或非首次显示，则直接显示
+			if (mui.os.ios || aniShow[targetTab]) {
+				plus.webview.show(targetTab);
+			} else {
+				//否则，使用fade-in动画，且保存变量
+				var temp = {};
+				temp[targetTab] = "true";
+				mui.extend(aniShow, temp);
+				plus.webview.show(targetTab, "fade-in", 200);
+
+			}
+			activeTab = targetTab;
+			console.log(activeTab)
+		});
+	});
+
+
+</script>

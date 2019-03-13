@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<link rel="stylesheet" href="../static/css/mui.min.css">
+</head>
+<style type="text/css">
+	.mui-content {
+		background-color: #ffffff;
+		padding: 15px 0;
+	}
+
+	footer {
+		margin-top: 10px;
+		width: 100%;
+	}
+
+	footer div {
+		background-color: #ffffff;
+	}
+
+	p {
+		margin: 0;
+		font-size: .94rem;
+		line-height: 23px;
+		overflow: hidden;
+		white-space: normal;
+	}
+
+	.foot-content {
+		position: relative;
+		padding: 12px 0;
+		width: 100%;
+		/* display: flex; */
+	}
+
+	.foot-content div:first-child {
+		float: right;
+		padding-right: 15px;
+	}
+
+	.foot-content div:nth-child(2) {
+		padding-left: 15px;
+	}
+
+	img {
+		margin: 0 auto;
+		width: 100px;
+		height: 70px;
+		border-radius: 5px;
+		-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.1) inset;
+		-moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.1) inset;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0px 0px 2px rgba(0, 0, 0, 0.1) inset;
+	}
+
+	#search-food-name {
+		font-weight: 700;
+	}
+
+	.select-picker {
+		z-index: 6;
+		background-color: #ffffff;
+	}
+
+	.com-name {
+		color: #28292d;
+	}
+
+	.select-header {
+		position: relative;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 50px;
+		line-height: 50px;
+		text-indent: 12px;
+		/* border-bottom: 1px solid #dddddd; */
+		box-shadow: 0 1px 1px #ddd, 0 0 1px #ddd;
+		background-color: #ffffff;
+		z-index: 7;
+	}
+
+
+	.select-list {
+		position: fixed;
+		top: 50px;
+		left: 0;
+		overflow-y: auto;
+		overflow-x: hidden;
+		width: 100%;
+		height: 240px;
+		z-index: 7;
+		background-color: #ffffff;
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+		display: none;
+	}
+
+	.select-list div {
+		position: relative;
+		width: 100%;
+		height: 40px;
+		font-size: .93rem;
+		line-height: 40px;
+		text-indent: 12px;
+	}
+
+	.select-list div:before {
+		content: '';
+		position: absolute;
+		top: 0;
+		width: 100%;
+		border-bottom: 1px solid #cccccc;
+		-webkit-transform-origin: 0 0;
+		transform-origin: 0 0;
+		-webkit-transform: scaleY(0.2);
+		transform: scaleY(0.2);
+		box-sizing: border-box;
+	}
+
+	.select-mask {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-color: rgba(0, 0, 0, .3);
+		z-index: 1;
+		display: none;
+	}
+
+	.up {
+		display: none;
+	}
+
+	.info div p {
+		padding-left: 15px;
+	}
+
+	.foot-content div p span:first-child {
+		color: #777;
+	}
+
+	.foot-content div p span:nth-child(2) {
+		margin-left: 7px;
+		font-weight: 700;
+	}
+</style>
+
+<body>
+	<div class="select-picker">
+		<div class="select-header">
+			<span class="up">商品名称&nbsp; &#10835;</span>
+			<span class="down">商品名称&nbsp; &#10836;</span>
+		</div>
+		<div class="thinner-border"></div>
+		<div class="select-list">
+
+		</div>
+	</div>
+	<div class="select-mask"></div>
+
+	<footer>
+		<div class="foot-content">
+			<div>
+				<img src="" />
+			</div>
+			<div>
+				<p>
+					<span>名称:&nbsp;&nbsp;&nbsp;</span>
+					<span id="search-food-name"></span>
+				</p>
+				<p>
+					<span>单价:&nbsp;&nbsp;&nbsp;</span>
+					<span id="search-food-price"></span>
+				</p>
+				<p>
+					<span>日销量: </span>
+					<span id="search-food-flow"></span>
+				</p>
+				<p>
+					<span class="span">编号:&nbsp;&nbsp;&nbsp;</span>
+					<span id="goods-id"></span>
+				</p>
+				<p>
+					<span class="span">详情:&nbsp;&nbsp;&nbsp;</span>
+					<span id="goods-detail"></span>
+				</p>
+				<p>
+					<span class="span">类型:&nbsp;&nbsp;&nbsp;</span>
+					<span id="goods-recommend"></span>
+				</p>
+				<p>
+					<span class="span">日期:&nbsp;&nbsp;&nbsp;</span>
+					<span id="date"></span>
+				</p>
+			</div>
+		</div>
+	</footer>
+</body>
+
+<script src="../static/js/vue.js"></script>
+<script src="../static/js/mui.min.js"></script>
+<script type="text/javascript">
+	mui.init({
+		swipeBack: true
+	});
+	var backMask = false;
+	var getDay = null;
+	var goodInfo = null;
+
+
+	//监听自定义事件，获取新闻详情
+	document.addEventListener('todaDetail', function (e) {
+		//前页传入的数据，直接渲染，无需等待ajax请求详情后
+		goodInfo = e.detail.num;
+		getDay = e.detail.day;
+		setGoodsInfo(e.detail.num)
+		getDate(e.detail.day)
+		getTodayAll(e.detail.day)
+	});
+
+
+	function getImg(i) {
+		return i == '' ? '../img/b1.jpg' : document.getElementsByTagName('img')[0].src = PicPath + 'goods_image/' + i
+	}
+
+	function getName(n) {
+		return document.getElementById('search-food-name').innerHTML = n
+	}
+
+	function getPrice(p) {
+		p = '￥' + getFloatStr(p / 100)
+		return document.getElementById('search-food-price').innerHTML = p
+	}
+
+	function getNumber(n) {
+		return document.getElementById('search-food-flow').innerHTML = n
+	}
+
+	function getId(i) {
+		return document.getElementById('goods-id').innerText = i
+	}
+
+	function getDetail(i) {
+		return document.getElementById('goods-detail').innerText = i
+	}
+
+	function getComm(i) {
+		i = i == 0 ? '非主推' : '主推'
+		return document.getElementById('goods-recommend').innerText = i
+	}
+
+	function getDate(d) {
+		return document.getElementById('date').innerText = d
+	}
+
+
+
+	//  获取传来的值
+	function setGoodsInfo(item) {
+		getName(item.goods_name)
+		getPrice(item.goods_price)
+		getImg(item.goods_image)
+		getNumber(item.number)
+		getId(item.goods_id)
+		getDetail(item.goods_details)
+		getComm(item.recommend)
+	}
+
+
+	var vm = new Vue({
+		el: '.select-picker',
+		data: {
+			items: ''
+		}
+	})
+
+
+	//重写返回逻辑
+	mui.back = function () {
+		plus.webview.currentWebview().close("slide-out-right", 200);
+	}
+
+
+	//  所有的商品列表
+	function getTodayAll(day) {
+		mui.ajax(beforePath + shopManagePath + 'GoodsOneDayStatistics', {
+			data: {
+				date: day
+			},
+			dataType: 'json', //服务器返回json格式数据
+			type: 'get', //HTTP请求类型
+			timeout: 10000, //超时时间设置为10秒；
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			success: function (data) {
+				console.log(data.data)
+				if (data.error == 0) {
+					//  创建选项卡里面的选项
+					let list = document.getElementsByClassName('select-list')[0]
+					for (let n in data.data) {
+						let d = document.createElement('div')
+						d.innerText = data.data[n].goods_name
+						list.appendChild(d)
+						d.addEventListener('tap', function () {
+							backMask = false
+							hideMask()
+							getName(data.data[n].goods_name)
+							getPrice(data.data[n].goods_price)
+							getImg(data.data[n].goods_image)
+							getNumber(data.data[n].number)
+							getId(data.data[n].goods_id)
+							getDetail(data.data[n].goods_details)
+						})
+					}
+				} else {
+
+				}
+
+			},
+			error: function (xhr, type, errorThrown) {
+
+				console.log("总计数据接收异常" + type);
+			}
+		})
+	}
+
+
+
+
+	//  监听选择商品显示遮罩
+	document.getElementsByClassName('select-header')[0].addEventListener('tap', function () {
+		showMask()
+	})
+	// 隐藏遮罩
+	document.getElementsByClassName('select-mask')[0].addEventListener('tap', function () {
+		hideMask()
+	})
+
+	//  显示遮罩
+	function showMask() {
+		//  如果遮罩还在返回键就为关闭遮罩
+		backMask = true
+		let se = document.getElementsByClassName('select-list')[0].style.display
+		document.getElementsByClassName('select-list')[0].style.display = se == 'block' ? 'none' : 'block'
+		let up = document.getElementsByClassName('up')[0].style.display
+		document.getElementsByClassName('up')[0].style.display = up == 'block' ? 'none' : 'block'
+		let down = document.getElementsByClassName('down')[0].style.display
+		document.getElementsByClassName('down')[0].style.display = down == 'none' ? 'block' : 'none'
+		let mask = document.getElementsByClassName('select-mask')[0].style.display
+		document.getElementsByClassName('select-mask')[0].style.display = mask == 'block' ? 'none' : 'block'
+	}
+
+	//  隐藏遮罩
+	function hideMask(params) {
+		//  如果遮罩还在返回键就为关闭遮罩
+		backMask = false
+		document.getElementsByClassName('select-list')[0].style.display = 'none'
+		document.getElementsByClassName('up')[0].style.display = 'none'
+		document.getElementsByClassName('down')[0].style.display = 'block'
+		document.getElementsByClassName('select-mask')[0].style.display = 'none'
+	}
+
+	//  重写返回逻辑 遮罩还在显示就先隐藏遮罩
+	mui.back = function () {
+		if (backMask == true) {
+			hideMask()
+		} else {
+			getName('')
+			getPrice('')
+			getImg('')
+			getNumber('')
+			plus.webview.currentWebview().close('auto');
+		}
+	}
+</script>
+
+</html>

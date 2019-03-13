@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="stylesheet" type="text/css" href="../static/fonts/left/iconfont.css" />
+	<link rel="stylesheet" type="text/css" href="../static/css/mui.min.css" />
+	<title>设置</title>
+</head>
+
+<style type="text/css">
+	body {
+		margin: 0;
+		outline: none;
+		font-size: .94rem;
+		font-family: Helvetica;
+	}
+
+	::-webkit-scrollbar {
+		display: none;
+	}
+
+	.mui-scrollbar {
+		display: none !important;
+	}
+
+	.list {
+		margin-top: 25px;
+	}
+</style>
+
+<body>
+	<header></header>
+	<div class="list">
+		<ul class="mui-table-view">
+			<li class="mui-table-view-cell account-setting">
+				<a class="mui-navigate-right">
+					&nbsp; 帐号与安全
+				</a>
+			</li>
+			<li class="mui-table-view-cell shop-edit">
+				<a class="mui-navigate-right">
+					&nbsp; 编辑店铺资料
+				</a>
+			</li>
+		</ul>
+	</div>
+
+	<div class="list">
+		<ul class="mui-table-view">
+			<li class="mui-table-view-cell shop-rule">
+				<a class="mui-navigate-right">
+					&nbsp; 店铺准则
+				</a>
+			</li>
+		</ul>
+	</div>
+
+	<div class="list">
+		<ul class="mui-table-view">
+			<li class="mui-table-view-cell cache-clean" onclick="clean()">
+				<a class="mui-navigate-right">
+					&nbsp; 缓存清理
+				</a>
+			</li>
+			<li class="mui-table-view-cell updata" onclick="checkVersion()">
+				<a class="mui-navigate-right">
+					&nbsp; 软件更新
+				</a>
+			</li>
+		</ul>
+	</div>
+</body>
+
+</html>
+
+<script src="../static/js/mui.min.js"></script>
+
+<script>
+
+	//  清理内存
+	function clean() {
+		plus.nativeUI.showWaiting("正在清理...")
+		setTimeout(() => {
+			plus.nativeUI.closeWaiting()		
+			plus.nativeUI.toast("清理成功");			
+		}, 1500);
+	}
+
+	//  查询版本
+	function checkVersion() {
+		plus.nativeUI.showWaiting("检查版本...")
+		setTimeout(() => {
+			plus.nativeUI.closeWaiting()
+			plus.nativeUI.toast("已经是最新版本，无需更新");
+		}, 1500);
+	}
+
+	//  账户与安全
+	document.getElementsByClassName('account-setting')[0].addEventListener('tap', function () {
+		setOpenWindow('account-setting.html', 'account-setting.html', '帐号信息', 'settingTitleNView')
+	})
+
+
+	//  店铺资料编辑
+	document.getElementsByClassName('shop-edit')[0].addEventListener('tap', function () {
+		setOpenWindow('setShopInfo.html', 'setShopInfo.html', '店铺信息设置', 'settingTitleNView')
+	})
+
+
+	//重写返回逻辑
+	mui.back = function () {
+		plus.webview.currentWebview().close("slide-out-right", 200);
+	}
+
+</script>

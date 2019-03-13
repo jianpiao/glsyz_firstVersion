@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>今日图表</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="stylesheet" href="../static/css/mui.min.css">
+    <link rel="stylesheet" type="text/css" href="../static/fonts/left/iconfont.css" />
+
+    <style>
+        .chart {
+            height: 200px;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        h5 {
+            margin-top: 30px;
+            font-weight: bold;
+            text-indent: 8px;
+            color: #AAAAAA;
+        }
+
+        h5:first-child {
+            margin-top: 15px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #444444;
+        }
+
+        header {
+            position: fixed;
+            top: 0px;
+            width: 100%;
+            background-color: #f7f7f7;
+            height: 40px;
+            line-height: 40px;
+            display: flex;
+        }
+
+        header div {
+            width: 50%;
+            margin-left: 12px;
+        }
+
+        header div:nth-child(2) {
+            text-align: right;
+            margin-right: 12px;
+        }
+
+        .mui-content {
+            margin-top: 40px;
+            padding-top: 10px;
+            background-color: #ffffff;
+        }
+
+        #month {
+            position: fixed;
+            z-index: 10;
+            width: 100%;
+            top: 0;
+            right: 0;
+            height: 40px;
+            outline: none;
+            border: none;
+            margin: 0;
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div>
+            <span>月份</span>
+        </div>
+        <div>
+            <input type="month" id="month" onchange="input(value)">
+            <span class="his-today"></span>
+        </div>
+    </header>
+    <div class="mui-content">
+        <div class="mui-content-padded">
+            <!--<h5>柱图总计</h5>
+				<div class="chart" id="barChart"></div>-->
+            <h5>营业曲线</h5>
+            <div class="chart" id="lineChart"></div>
+            <h5>销售热门</h5>
+            <div class="chart" id="pieChart"></div>
+        </div>
+    </div>
+    <script src="../static/js/mui.min.js"></script>
+    <script src="../static/js/echarts-all.js"></script>
+    <script>
+        mui.init({
+            swipeBack: true
+        });
+
+
+        //  日期选择
+        function input(value) {
+            plus.nativeUI.showWaiting();
+            console.log(value.substr(0, 4) + "===" + value.substr(5, 2))
+            todaySale(value.substr(0, 4), value.substr(5, 2))
+            document.getElementsByClassName('his-today')[0].innerText = value
+        }
+
+
+        //  默认当前的年月
+        var SelectYears = ''
+        var SelectMonth = ''
+        SelectYears = new Date().getFullYear()
+        SelectMonth = new Date().getMonth() + 1
+        if (SelectMonth < 10) {
+            SelectMonth = '0' + SelectMonth
+        }
+        document.getElementsByClassName('his-today')[0].innerText = SelectYears + "-" + SelectMonth
+
+
+
+        window.onload = function () {
+            //从服务器获取数据  
+            todaySale(SelectYears, SelectMonth)
+            //业务数据获取完毕，并已插入当前页面DOM；  
+            //注意：若为ajax请求，则需将如下代码放在处理完ajax响应数据之后；  
+            mui.plusReady(function () {
+                //关闭等待框  
+                plus.nativeUI.closeWaiting();
+                //显示当前页面  
+                mui.currentWebview.show();
+            });
+        }
+
+        function todaySale(y, m) {
+            // 今天销售情况
+            mui.ajax(beforePath + shopManagePath + 'MonthlyTurnover', {
+                data: {
+                    year: 2017,
+                    month: 12
+                },
+                dataType: 'json', //服务器返回json格式数据
+                type: 'post', //HTTP请求类型
+                timeout: 10000, //超时时间设置为10秒；
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                success: function (data) {
+                    console.log(data.data)
+                    plus.nativeUI.closeWaiting();
+                    if (data.error == 0) {
+                        var dpri = [];
+                        var tout = [];
+                        var dnum = [];
+                        for (let m = 0; m < 31; m++) {
+                            dpri[m] = data.data.details.length > m ? data.data.details[m].turnover / 100 : 0
+                            tout[m] = data.data.details.length > m ? data.data.details[m].shop_flow : 0
+                            dnum[m] = data.data.details.length > m ? data.data.details[m].takeout_fee / 100 : 0
+                        }
+                        //  导入数据到表格
+                        option(dpri, tout, dnum)
+
+                    } else {
+
+                    }
+
+                },
+                error: function (xhr, type, errorThrown) {
+                    console.log("总计数据接收异常" + type);
+                }
+            })
+        }
+
+        //  数据表
+        function option(dpri, tout, dnum) {
+            var getOption = function (chartType) {
+                var chartOption = chartType == 'pie' ? {
+                    calculable: false,
+                    series: [{
+                        name: '销售最热',
+                        type: 'pie',
+                        radius: '65%',
+                        center: ['50%', '50%'],
+                        data: [{
+                            value: 335,
+                            name: '红烧茄子'
+                        }, {
+                            value: 310,
+                            name: '通心粉'
+                        }, {
+                            value: 234,
+                            name: '可乐鸡翅'
+                        }, {
+                            value: 135,
+                            name: '酸甜排骨'
+                        }, {
+                            value: 1548,
+                            name: '青椒炒牛肉'
+                        }]
+                    }]
+                } : {
+                        legend: {
+                            data: ['日营业额', '日总单数', '外卖费']
+                        },
+                        grid: {
+                            x: 35,
+                            x2: 10,
+                            y: 30,
+                            y2: 25
+                        },
+                        toolbox: {
+                            show: false,
+                            feature: {
+                                mark: {
+                                    show: true
+                                },
+                                dataView: {
+                                    show: true,
+                                    readOnly: false
+                                },
+                                magicType: {
+                                    show: true,
+                                    type: ['line', 'bar']
+                                },
+                                restore: {
+                                    show: true
+                                },
+                                saveAsImage: {
+                                    show: true
+                                }
+                            }
+                        },
+                        calculable: false,
+                        xAxis: [{
+                            type: 'category',
+                            data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21',
+                                '22', '23', '24', '25', '26', '27', '28', '29', '30', '31'
+                            ]
+                        }],
+                        yAxis: [{
+                            type: 'value',
+                            splitArea: {
+                                show: false
+                            }
+                        }],
+                        series: [{
+                            name: '日营业额',
+                            type: chartType,
+                            data: dpri
+                        }, {
+                            name: '日总单数',
+                            type: chartType,
+                            data: tout
+                        }, {
+                            name: '外卖费',
+                            type: chartType,
+                            data: dnum
+                        }]
+                    };
+                return chartOption;
+            };
+            var byId = function (id) {
+                return document.getElementById(id);
+            };
+            //			var barChart = echarts.init(byId('barChart'));
+            //			barChart.setOption(getOption('bar'));
+            var lineChart = echarts.init(byId('lineChart'));
+            lineChart.setOption(getOption('line'));
+            var pieChart = echarts.init(byId('pieChart'));
+            pieChart.setOption(getOption('pie'));
+            //			byId("echarts").addEventListener('tap', function() {
+            //				var url = this.getAttribute('data-url');
+            //				plus.runtime.openURL(url);
+            //			}, false);
+        }
+
+
+        //重写返回逻辑
+        mui.back = function () {
+            plus.webview.currentWebview().close("slide-out-right", 200);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,176 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<link href="../static/css/mui.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="../static/css/color.css">
+	<script src="../static/js/vue.js"></script>
+	<script src="../static/js/mui.min.js"></script>
+</head>
+<style type="text/css">
+	.mui-table-view {
+		margin-top: 15px;
+		font-size: 1rem;
+	}
+
+	.mui-button-row {
+		padding-bottom: 7px;
+	}
+
+	.button {
+		margin-top: 20px;
+	}
+
+	#add {
+		height: 35px;
+		line-height: 35px;
+		width: 85%;
+		margin: 0 auto;
+		border: 1px solid #dddddd;
+		border-radius: 5px;
+		background-color: #ffffff;
+		color: #111111;
+	}
+
+	#submit {
+		height: 35px;
+		line-height: 35px;
+		width: 85%;
+		margin: 20px auto;
+		border-radius: 5px;
+		color: #ffffff;
+	}
+
+	.mui-pull-right {
+		font-weight: 700;
+	}
+
+	.view {
+		width: 100%;
+		height: 50px;
+		margin-top: 25px;
+		text-align: center;
+		line-height: 50px;
+		font-size: 1.2rem;
+		color: #aaaaaa;
+	}
+
+	.mui-btn {
+		margin: 0 15px;
+	}
+</style>
+
+<body>
+	<div id="classList">
+		<div class="view" v-show="items.length == 0">
+			暂无分类
+		</div>
+		<div class="list">
+			<template>
+				<ul class="mui-table-view" v-for="(item,index) in items">
+					<li class="mui-table-view-cell" @click="modify(old,item.shop_goods_category_name,index)">
+						<a>分类名
+							<span class="mui-pull-right">{{ item.shop_goods_category_name }}</span>
+						</a>
+					</li>
+					<div class="mui-button-row">
+						<button type="button" class="mui-btn mui-btn-danger" @click="remove(index)">删除</button>
+					</div>
+				</ul>
+			</template>
+		</div>
+		<div class="mui-button-row button">
+			<div id="add" @touchstart="backAdd = '#f7f7f7'" @touchend="backAdd = '#ffffff'" :style="{backgroundColor:backAdd}" @click="add">添加</div>
+			<div id="submit" @touchstart="back = '#05867a'" @touchend="back = '#069687'" :style="{backgroundColor:back}" @click="submit">确认</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		//重写返回逻辑
+		mui.back = function () {
+			plus.webview.currentWebview().close("slide-out-right", 200);
+		}
+
+		var vm = new Vue({
+			el: '#classList',
+			data: {
+				items: '',
+				backAdd: '',
+				back: ''
+			},
+			created() {
+				mui.plusReady(function (e) {
+					plus.nativeUI.showWaiting()
+				})
+				this.getAjax()
+			},
+			methods: {
+				getAjax() {
+					let self = this
+					mui.post(URL + 'ShopGoodsCategoryList', function (data) {
+						plus.nativeUI.closeWaiting();
+						console.log(data.data)
+						if (data.error == 0) {
+							self.items = data.data
+						}
+					});
+				},
+				remove(i) {
+					this.items.splice(i, 1)
+				},
+				add() {	
+					this.modify('new')
+				},
+				modify(tap,name,i) {
+					let self = this
+					// 弹出输入对话框
+					plus.nativeUI.prompt("新的分类名", function (e) {
+						if (e.index == 0 && e.value != '') {
+							if (tap == 'new') {
+								self.items.push({
+									shop_goods_category_id: 0,
+									shop_goods_category_name: e.value
+								})
+							} else {
+								self.items[i].shop_goods_category_name = e.value
+							}
+						};
+					}, "修改分类名", name, ["确定", "取消"]);
+				},
+				submit() {
+					let self = this
+					plus.nativeUI.confirm('确认修改？', function (e) {
+						if (e.index == 0) {
+							mui.ajax(URL + 'UpShopGoodsCategoryList', {
+								data: {
+									category_list: JSON.stringify(self.items)
+								},
+								dataType: 'json', //服务器返回json格式数据
+								type: 'post', //HTTP请求类型
+								timeout: 10000, //超时时间设置为10秒；
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								success: function (data) {
+									console.log(data.data)
+									if (data.error == 0) {
+										plus.nativeUI.toast("提交成功！")
+									}
+								},
+								error: function (xhr, type, errorThrown) {
+									console.log("总计数据接收异常" + type);
+								}
+							})
+						}
+					}, "", ["确认", "取消"]);
+				}
+			}
+		})
+
+	</script>
+</body>
+
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../static/css/mui.min.css">
+    <title>交易记录</title>
+</head>
+<style>
+    .pname {
+        font-weight: 700;
+        font-size: .95rem;
+        width: calc(100% - 90px);
+        overflow: hidden;
+        display: inline-block;
+        text-overflow: ellipsis;
+    }
+
+    .state {
+        float: right;
+        font-size: .89rem;
+        color: #009688;
+    }
+
+    .mui-table-view-cell p {
+        color: #777;
+    }
+</style>
+
+<body>
+
+    <div class="transactions">
+        <template>
+            <ul class="mui-table-view">
+                <li class="mui-table-view-cell" v-for="(item, index) in items" @click="openWebview(item)">
+                    <a>
+                        <div class="pname">
+                            <span v-for="oname in items[index].order_information">{{ oname.goods_name }}*{{oname.number}}&nbsp;&nbsp;</span>
+                        </div>
+                        <span class="state">{{item.order_state | orderState}}</span>
+                        <p>
+                            <span>订单时间 :</span>
+                            <span>{{item.date}}</span>
+                        </p>
+                        <p>
+                            <span>总价:</span>
+                            <span class="price">￥{{ item.order_price / 100 | priceFilter }}</span>
+                        </p>
+                    </a>
+                </li>
+            </ul>
+        </template>
+    </div>
+
+
+    <script src="../static/js/vue.js"></script>
+    <script src="../static/js/mui.min.js"></script>
+    <script>
+        var first = 0
+
+        var vm = new Vue({
+            el: '.transactions',
+            data: {
+                items: ''
+            },
+            created() {
+                this.getAjax()
+                mui.plusReady(function () {
+                    //关闭等待框  
+                    plus.nativeUI.showWaiting();
+                });
+            },
+            methods: {
+                getAjax() {
+                    let self = this
+                    mui.ajax(beforePath + shopManagePath + 'GetOrderList4', {
+                        data: {
+                            page: 1
+                        },
+                        dataType: 'json', //服务器返回json格式数据
+                        type: 'post', //HTTP请求类型
+                        success: function (data) {
+                            plus.nativeUI.closeWaiting();
+                            console.log(data.data)
+                            if (data.error == 0) {
+                                data.data.data = data.data.data.sort(down)
+                                self.items = data.data.data
+                            }
+                        },
+                        error: function (xhr, type, errorThrown) {
+                            console.log("总计数据接收异常" + type);
+                        }
+                    })
+                },
+                openWebview(item) {
+                    open(item)
+                }
+            },
+            filters: {
+                priceFilter(v) {
+                    return getFloatStr(v)
+                },
+                orderState(s) {
+                    //  订单状态
+                    if (s == 1) {
+                        return '已下单'
+                    } else if (s == 2) {
+                        return '已接单'
+                    } else if (s == 3) {
+                        return '已结单'
+                    } else if (s == 4) {
+                        return '退单中'
+                    } else {
+                        return '已退单'
+                    }
+                }
+            }
+        })
+
+
+        mui.plusReady(function () {
+            //预加载详情页
+            titleNView.titletext = '订单详情'
+            webview_detail = mui.preload({
+                url: '../index/search-order-detail.html',
+                id: 'order-search-order-detail.html',
+                styles: setStyle
+            });
+        });
+
+
+
+        //  打开商品详情
+        function open(item) {
+            mui.fire(webview_detail, 'goodsInfo', {
+                num: item
+            });
+            webview_detail.show("slide-in-right", 200);
+        }
+
+        //重写返回逻辑
+        mui.back = function () {
+            plus.webview.currentWebview().close("slide-out-right", 200);
+        }
+
+        //  数组排序
+        function down(x, y) {
+            return (x.date < y.date) ? 1 : -1
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../static/css/mui.min.css">
+    <link rel="stylesheet/less" type="text/css" href="style.css">
+    <link rel="stylesheet" href="../static/css/color.css">
+    <script src="../static/js/vue.js"></script>
+    <script src="../static/js/mui.min.js"></script>
+    <title>等待上菜</title>
+</head>
+
+<style>
+    .pname {
+        font-weight: 700;
+        font-size: .95rem;
+        width: calc(100% - 90px);
+        overflow: hidden;
+        display: inline-block;
+        text-overflow: ellipsis;
+    }
+
+    .empty {
+        position: fixed;
+        top: 20px;
+        width: 100%;
+        height: 60px;
+        line-height: 50px;
+        text-align: center;
+        color: #999;
+        font-size: 1.2rem;
+    }
+
+    .address {
+        padding: 11px 7px;
+        /* border: 1px solid #009688; */
+        background: linear-gradient(to bottom right, #29ad9c, #5beebd);
+        border-radius: 5px;
+        float: right;
+        font-size: .95rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .mui-table-view-cell p {
+        color: #777;
+    }
+
+    .mui-table-view-cell>a:not(.mui-btn).mui-active {
+        background-color: #ffffff;
+    }
+</style>
+
+<body>
+    <div id="delivery">
+        <template>
+            <ul class="mui-table-view">
+                <center class="empty" v-if="items.length == 0">暂无订单</center>
+                <li class="mui-table-view-cell" v-for="(item, index) in items">
+                    <a>
+                        <div class="pname">
+                            <span v-for="n in item.order_information">{{ n.goods_name }}*{{n.number}}&nbsp;&nbsp;</span>
+                        </div>
+                        <p>
+                            <div class="address" @click="delivery(item,index)">配送 &#10095;</div>
+                        </p>
+                        <p>
+                            <span style="color: #55A532">座位 : {{item.address}}</span>
+                        </p>
+                        <p>
+                            <span>订单时间 :</span>
+                            <span>{{item.date}}</span>
+                        </p>
+                        <p>
+                            <span>总价:</span>
+                            <span class="price">￥{{ item.order_price / 100 }}</span>
+                        </p>
+                    </a>
+                </li>
+            </ul>
+        </template>
+    </div>
+
+
+    <script>
+        var vm = new Vue({
+            el: '#delivery',
+            data: {
+                items: ''
+            },
+            created() {
+                mui.plusReady(function (e) {
+                    plus.nativeUI.showWaiting()
+                })
+                this.getAjax()
+            },
+            methods: {
+                getAjax() {
+                    let self = this
+                    mui.post(URL + 'GetServingOrderList', function (data) {
+                        plus.nativeUI.closeWaiting()
+                        self.items = data.data
+                    });
+                },
+                delivery(item,i) {
+                    let self = this
+                    mui.post(URL + 'Serving',{
+                        order_id: item.order_id
+                    }, function (data) {
+                        console.log(data.data)
+                        if (data.error == 0) {
+                            self.items.splice(i,1)
+                            plus.nativeUI.toast("提醒成功")
+                        }
+                    });
+                }
+            }
+        })
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="../static/fonts/left/iconfont.css" />
+    <link rel="stylesheet" href="../static/css/mui.min.css">
+    <link rel="stylesheet" href="../static/cropper.css">
+    <link rel="stylesheet" href="../static/css/mint-css.css">
+    <script src="../static/js/vue.js"></script>
+    <script src="../static/js/mui.min.js"></script>
+    <script src="../static/js/mint-ui.js"></script>
+    <script src="../static/app.js"></script>
+    <title>店铺信息设置</title>
+</head>
+
+<style>
+    body {
+        margin: 0;
+        font-size: .91rem;
+        background-color: rgba(0, 0, 0, .03);
+    }
+
+    header:before {
+        -webkit-transform: scaleY(0.5);
+        transform: scaleY(0.5);
+    }
+
+    img {
+        width: 48px;
+        height: auto;
+    }
+
+    .sign {
+        padding: 10px 0 10px 15px;
+        color: #999;
+        background-color: #f7f7f7;
+        font-size: .9rem
+    }
+
+    .mui-pull-right {
+        width: 70%;
+        text-align: right;
+        color: #000;
+        word-wrap: break-word;
+		white-space: normal;
+    }
+
+    .mui-table-view-cell span:first-child {
+        color: #7c8886;
+    }
+
+    .mui-table-view-cell>a:not(.mui-btn) {
+        margin: -10px -15px;
+    }
+
+    .mui-table-view-cell>a:not(.mui-btn).mui-active {
+        background-color: #ffffff;
+    }
+
+    select {
+        width: 88%;
+        direction: rtl;
+    }
+
+    .button {
+        padding: 20px 0;
+        background-color: #fff;
+    }
+
+    #submit {
+        height: 35px;
+        line-height: 35px;
+        width: 85%;
+        font-size: 16px;
+        margin: 20px auto;
+        background-color: #069687;
+        border-radius: 5px;
+        color: #ffffff;
+    }
+
+    .mui-fullscreen {
+        background-color: #000;
+        position: fixed;
+    }
+
+    .mui-fullscreen.mui-slider .mui-slider-group {
+        height: 50%;
+    }
+
+    .mui-slider .mui-slider-group .mui-slider-item img {
+        position: fixed;
+        z-index: 1000000;
+        top: 10%;
+        left: 0;
+        width: 114%;
+        height: inherit;
+    }
+
+    .right {
+        position: absolute;
+        right: 15px;
+        top: 5px;
+    }
+
+    input[type=time] {
+        position: fixed;
+        top: 10px;
+        right: 45%;
+        width: 0;
+        height: 0;
+        margin: 0 !important;
+        padding: 0 !important;
+        opacity: 0;
+    }
+</style>
+
+<body>
+    <div id="shopInfo">
+        <header></header>
+        <input type="time"  v-model="items.business_hours_start" id="start">
+        <input type="time"  v-model="items.business_hours_end" id="end">
+        <ul class="mui-table-view">
+            <li class="sign">
+                <span>信息相关</span>
+            </li>
+            <li class="mui-table-view-cell" @click="modify(1,items.shop_name)">
+                <a>
+                    <span>名称</span>
+                    <shop-info :c="items.shop_name"></shop-info>
+                </a>
+            </li>
+            <li class="mui-table-view-cell" @click="modify(2,items.synopsis)">
+                <a>
+                    <span>简介</span>
+                    <shop-info :c="items.synopsis"></shop-info>
+                </a>
+            </li>
+            <li class="mui-table-view-cell" @click="shopID">
+                <a>
+                    <span>编号</span>
+                    <shop-info :c="items.shop_id"></shop-info>
+                </a>
+            </li>
+            <li class="mui-table-view-cell">
+                <a>
+                    <span>类型</span>
+                    <select v-model="items.shop_category_id">
+                        <option v-for="item in category" :value="item.shop_category_id">{{item.shop_category_name}}</option>
+                    </select>
+                </a>
+            </li>
+            <li class="mui-table-view-cell" @click="shopID">
+                <a>
+                    <span>地址</span>
+                    <shop-info :c="items.address"></shop-info>
+                </a>
+            </li>
+            <li class="sign">
+                <span>默认内容</span>
+            </li>
+            <li class="mui-table-view-cell" @click="modify(3,items.takeout_fee)">
+                <a>
+                    <span>外卖费</span>
+                    <shop-info :c="items.takeout_fee /100 | priceFilter"></shop-info>
+                </a>
+            </li>
+            <li class="mui-table-view-cell" @click="modify(4,items.packing_fee)">
+                <a>
+                    <span>打包费</span>
+                    <shop-info :c="items.packing_fee /100 | priceFilter"></shop-info>
+                </a>
+            </li>
+            <li class="mui-table-view-cell">
+                <a>
+                    <span>预定点餐</span>
+                    <mt-switch class="right" v-model="items.reserve_order"></mt-switch>
+                </a>
+            </li>
+            <li class="mui-table-view-cell">
+                <a>
+                    <span>线上点餐</span>
+                    <mt-switch class="right" v-model="items.online_order"></mt-switch>
+                </a>
+            </li>
+            <li class="mui-table-view-cell">
+                <a>
+                    <span>前台点餐</span>
+                    <mt-switch class="right" v-model="items.reception_order"></mt-switch>
+                </a>
+            </li>
+            <li class="mui-table-view-cell">
+                <a>
+                    <span>桌面点餐</span>
+                    <mt-switch class="right" v-model="items.tabletop_order"></mt-switch>
+                </a>
+            </li>
+            <li class="sign">
+                <span>头像背景</span>
+            </li>
+            <li class="mui-table-view-cell" @click="changePic(1)">
+                <a>
+                    <span>头像</span>
+                    <div class="mui-pull-right">
+                        <img :src="items.shop_image | shopImg" alt="" @click.stop="previewImage(0)">
+                    </div>
+                </a>
+            </li>
+            <li class="mui-table-view-cell" @click="changePic(2)">
+                <a>
+                    <span>背景图</span>
+                    <div class="mui-pull-right">
+                        <img :src="items.back_image | backImg" alt="" @click.stop="previewImage(1)">
+                    </div>
+                </a>
+            </li>
+            <li class="sign">
+                <span>时间期限</span>
+            </li>
+            <li class="mui-table-view-cell" onclick="document.getElementById('start').click()">
+                <a>
+                    <span>开店时间</span>
+                    <shop-info :c="items.business_hours_start | filterTime"></shop-info>
+                </a>
+            </li>
+            <li class="mui-table-view-cell" onclick="document.getElementById('end').click()">
+                <a>
+                    <span>关店时间</span>
+                    <shop-info :c="items.business_hours_end | filterTime"></shop-info>
+                </a>
+            </li>
+            <li class="mui-table-view-cell">
+                <a>
+                    <span>营业状态</span>
+                    <select v-model="items.shop_state" class="mui-pull-right">
+                        <option value="0">停业</option>
+                        <option value="1">营业</option>
+                    </select>
+                </a>
+            </li>
+            <li class="mui-table-view-cell">
+                <a>
+                    <span>到期时间</span>
+                    <shop-info :c="items.expiration_date"></shop-info>
+                </a>
+            </li>
+            <div class="mui-button-row button">
+                <div id="submit" @click="submit">提交</div>
+            </div>
+        </ul>
+        <canvas style="display: none;"></canvas>
+    </div>
+
+<script>
+
+        Vue.component('shop-info', {
+            template: '<div class="mui-pull-right">{{c}}</div>',
+            props: ['c']
+        })
+
+
+        var vm = new Vue({
+            el: '#shopInfo',
+            data: {
+                items: '',
+                category: [],
+                time: '',
+                timeIndex: ''
+            },
+            created () {
+                 mui.plusReady(function () {
+                    plus.nativeUI.showWaiting();
+                });
+                GetAjax()
+            },
+            methods: {
+                modify(i,v) {
+                    if (i == 1) {
+                        modifyInfo(i,'修改店铺名称', '新的店铺名称', v)
+                    } else if (i == 2) {
+                        modifyInfo(i,'修改店铺简介', '新的店铺简介', v)
+                    } else if (i == 3) {
+                        modifyInfo(i, '修改外卖费', '新的价格', v)
+                    } else if (i == 4) {
+                        modifyInfo(i, '修改打包费', '新的价格', v)
+                    }
+                },
+                shopID() {
+                    plus.nativeUI.toast('默认,不可更改')
+                },
+                changePic(i) {
+                    changeHead(i)
+                },
+                previewImage(i) {
+                    previewImage(i)
+                },
+                submit() {
+                    let a = [],b = [],c = '' , d = ''
+                    a = this.items.business_hours_start.split(":")
+                    b = this.items.business_hours_end.split(":")
+                    c = a[0]*3600 + a[1]*60
+                    d = b[0]*3600 + b[1]*60
+                    console.log(c +  "====" + d)
+                    if (a > b) {
+                        plus.nativeUI.alert("开店时间不能大于关店时间")
+                    } else {
+                        submit(this.items)
+                    }
+                }
+            }, 
+            filters: {
+                priceFilter(v) {
+                    return getFloatStr(v) + '元'
+                },
+                shopImg(v) {
+                    return PicPath + 'shop_image/' + v
+                },
+                backImg(v) {
+                    return PicPath + 'shop_back_image/' + v
+                },
+                online(v) {
+                    return v == 0 ? false : true
+                },
+                filterTime(v) {
+                    if (v != '') {
+                        let sb = []
+                        sb = v.split(":")
+                        return sb.length < 3 ? v + ':00' : v
+                    } else {
+                        return '00:00:00'
+                    }
+                }
+            }
+        })
+
+
+
+        function GetAjax() {
+            //  分类信息
+            mui.post(URL + 'ShopCategoryList', function (data) {
+                plus.nativeUI.closeWaiting()
+                if (data.error == 0) {
+                    vm.category = data.data
+                } else {
+                    plus.nativeUI.toast('网络请求失败');
+                }
+            });
+
+
+            //  店铺信息
+            mui.post(URL + 'GetShop', function (data) {
+                if (data.error == 0) {
+                    console.log(data.data)
+                    vm.items = data.data
+                    vm.items.reserve_order = vm.items.reserve_order == 0 ? false : true
+                    vm.items.tabletop_order = vm.items.tabletop_order == 0 ? false : true
+                    vm.items.online_order = vm.items.online_order == 0 ? false : true
+                    vm.items.reception_order = vm.items.reception_order == 0 ? false : true
+                } else {
+                    plus.nativeUI.toast('服务器繁忙!');
+                }
+            })
+        }
+
+
+
+
+    //重写返回逻辑
+    mui.back = function () {
+        plus.webview.currentWebview().close("slide-out-right", 200);
+    }
+
+
+
+    //裁剪图片
+    function cutImage(path, index) {
+        mui.openWindow({
+            url: '../setPicture/setShopBackImg.html',
+            id: 'setShopBackImg.html',
+            extras: {
+                path: path,
+                id: index
+            },
+            show: {
+                aniShow: 'zoom-fade-in',
+                duration: 800
+            },
+            waiting: {
+                autoShow: true
+            }
+        });
+    }
+
+
+    //添加updateHeadImg自定义事件监听
+    window.addEventListener('updateHeadImg', function (e) {
+        //获得事件参数
+        var img = e.detail.img_path;
+        let id = e.detail.num
+        //根据id向服务器请求新闻详情
+        if (img != "") {
+            updataHead(id, img)
+        }
+    });
+
+    // 扩展API加载完毕，现在可以正常调用扩展API 
+    function plusReady() {
+        ws = plus.webview.currentWebview();
+    }
+
+    // 判断扩展API是否准备，否则监听'plusready'事件 
+    // 把需要调用的元素控件放到这里监听
+    if (window.plus) {
+        plusReady();
+        shopSummary();
+        updataBackPic();
+        captureImage();
+    } else {
+        document.addEventListener('plusready', plusReady, false);
+    }
+
+
+
+    //  提交参数
+    function submit(i) {
+        plus.nativeUI.confirm("确认修改", function (e) {
+            if (e.index == 0) {
+                i.tabletop_order = i.tabletop_order == false ? 0 : 1,
+                i.reserve_order = i.reserve_order == false ? 0 : 1,
+                i.online_order = i.online_order == false ? 0 : 1,
+                i.reception_order = i.reception_order == false ? 0 : 1
+
+                mui.post(URL + 'SetShopInfo',
+                {
+                    i
+                }, 
+                function (data) {
+                    if (data.error === 0) {
+                        console.log(data.data)
+                        plus.nativeUI.toast('店铺信息更新成功');
+                    } else {
+                        plus.nativeUI.toast('店铺信息更新失败！');
+                    }
+                })
+            }
+        })
+    }
+
+
+    //  改变类型
+    function changeType(value) {
+        console.log(value)
+    }
+
+    //  改变状态
+    function changeState(value) {
+        console.log(value)
+    }
+
+
+    //  弹出对话框
+    function modifyInfo(index,head, middle, con) {
+        if (index == 3 || index == 4) {
+            plus.nativeUI.prompt(middle, function (e) {
+                if (e.index == 0 && e.value != '') {
+                    //  数据验证是否为数字
+                    if (validate(e.value)) {
+                        index == 3 ? vm.items.takeout_fee = e.value*100 : vm.items.packing_fee = e.value*100
+                    } else {
+                        plus.nativeUI.toast('数据有误!');
+                    }
+                };
+            }, head, con, ["确定", "取消"]);
+        } else {
+            //  修改内容
+            plus.nativeUI.prompt(middle, function (e) {
+                if (e.index == 0 && e.value != '') {
+                    index == 1 ? vm.items.shop_name = e.value : vm.items.synopsis = e.value
+                };
+            }, head, con, ["确定", "取消"]);
+        }
+    }
+
+
+    // 图片预览
+    function previewImage(index) {
+        event.stopPropagation()
+        plus.nativeUI.previewImage([
+            PicPath + 'shop_image/' + vm.items.shop_image,
+            PicPath + 'shop_back_image/' + vm.items.back_image
+        ], {
+                current: index,
+                loop: true,
+            });
+    }
+
+
+
+    /*改变头像和背景*/
+    function changeHead(i) {
+        if (mui.os.plus) {
+            var a = [{
+                title: "拍照"
+            }, {
+                title: "从手机相册选择"
+            }];
+            plus.nativeUI.actionSheet({
+                cancel: "取消",
+                buttons: a
+            }, function (b) { /*actionSheet 按钮点击事件*/
+                switch (b.index) {
+                    case 0:
+                        break;
+                    case 1:
+                        getImage(i); /*拍照*/
+                        break;
+                    case 2:
+                        galleryImg(i); /*打开相册*/
+                        break;
+                    default:
+                        break;
+                }
+            })
+        }
+    }
+
+
+    //拍照
+    function getImage(i) {
+        var cmr = plus.camera.getCamera();
+        var res = cmr.supportedImageResolutions[0];
+        var fmt = cmr.supportedImageFormats[0];
+        cmr.captureImage(function (path) {
+            //  获取连接
+            plus.io.resolveLocalFileSystemURL(path, function (entry) {
+                var localUrl = entry.toLocalURL() + "?version=" + new Date().getTime();
+                plus.nativeUI.showWaiting();
+                cutImage(localUrl, i);//裁剪图片，传入绝对地址
+                // updataHead(i, localUrl + "?version=" + new Date().getTime());
+            }, function (err) {
+                console.error("拍照失败：" + err.message);
+            }, {
+                    index: 1
+                });
+        });
+    }
+
+
+    //本地相册选择
+    function galleryImg(i) {
+        plus.gallery.pick(function (a) {
+            plus.io.resolveLocalFileSystemURL(a, function (entry) {
+                plus.io.resolveLocalFileSystemURL("_doc/", function (root) {
+                    root.getFile("head.png", {}, function (file) {
+                        //文件已存在
+                        file.remove(function () {
+                            console.log("file remove success");
+                            entry.copyTo(root, 'head.png', function (e) {
+                                var path = e.fullPath + "?version=" + new Date().getTime();
+                                plus.nativeUI.showWaiting();
+                                cutImage(path, i);//裁剪图片，传入绝对地址
+                                // updataHead(i, e); /*上传图片*/
+                                //变更大图预览的src
+                                //目前仅有一张图片，暂时如此处理，后续需要通过标准组件实现
+                            }, function (e) {
+                                console.log('copy image fail:' + e.message);
+                            });
+                        }, function () {
+                            console.log("delete image fail:" + e.message);
+                        });
+                    }, function () {
+                        //文件不存在
+                        entry.copyTo(root, 'head.png', function (e) {
+                            var path = e.fullPath + "?version=" + new Date().getTime();
+                            plus.nativeUI.showWaiting();
+                            cutImage(path, i);
+                            // updataHead(i, path); /*上传图片*/
+                        }, function (e) {
+                            console.log('copy image fail:' + e.message);
+                        });
+                    });
+                }, function (e) {
+                    console.log("get _www folder fail");
+                })
+            }, function (e) {
+                console.log("读取拍照文件错误：" + e.message);
+            });
+        }, function (a) { }, {
+                filter: "image"
+            })
+    };
+
+    //上传头像图片
+    function updataHead(i, imgPath) {
+        var image = new Image();
+        image.src = imgPath;
+        image.onload = function () {
+            var imgData = getBase64Image(image);
+            let updata = i == 1 ? 'UpShopLogo' : 'UpShopBackImage'
+            //  图片上传
+            mui.ajax({
+                url: URL + updata,
+                type: 'POST',
+                data: {
+                    image: imgPath
+                },
+                dataType: 'json', //服务器返回json格式数据
+                timeout: 10000, //超时时间设置为10秒；	
+                success: function (data) {
+                    console.log(data.data)
+                    if (data.error == 0) {
+                        i == 1 ? vm.items.shop_image = data.data : vm.items.back_image = data.data
+                        plus.nativeUI.closeWaiting();
+                        // plus.nativeUI.toast('上传成功');
+                    } else {
+                        plus.nativeUI.closeWaiting();
+                        plus.nativeUI.toast('上传失败' + data.data);
+                    }
+                },
+                error: function (data) {
+                    plus.nativeUI.toast('服务器出错啦！');
+                }
+            });
+        }
+    }
+
+
+    //将图片压缩转成base64
+    function getBase64Image(img) {
+        //		var canvas = document.createElement("canvas");
+        let canvas = document.createElement("canvas");
+        canvas.getAttribute('class', 'var canvas')
+        let width = img.width;
+        let height = img.height;
+        canvas.width = 450; /*设置新的图片的宽度*/
+        canvas.height = 320; /*设置新的图片的长度*/
+        let ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, 450, 320, 0, 0, 500, 500); /*绘图*/
+        let dataURL = canvas.toDataURL("image/jpg", 0.8);
+        //		return dataURL.replace("data:image/png;base64,", "");
+        return dataURL
+    }
+
+    // 数字验证
+    function validate(num) {
+        var reg = /^\d+(?=\.{0,1}\d+$|$)/
+        return reg.test(num);
+    }
+</script>
+
+</body>
+
+</html>

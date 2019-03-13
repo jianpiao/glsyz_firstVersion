@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../static/css/mui.min.css">
+    <link rel="stylesheet" type="text/css" href="../static/fonts/left/iconfont.css" />
+    <title>登录</title>
+</head>
+<style>
+    body {
+        background-color: #fff;
+    }
+
+    .log {
+        width: 100%;
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .logo {
+        position: absolute;
+        z-index: 10;
+        top: 88px;
+        width: 100%;
+        text-align: center;
+        color: #fff;
+    }
+
+    .logo p {
+        margin: 10px 0 0 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        letter-spacing: 5px;
+    }
+
+    .account,
+    .password {
+        position: relative;
+        width: 88%;
+        margin: 0 auto;
+    }
+
+    input {
+        margin: 0 !important;
+        border: none !important;
+        outline: none;
+        width: inherit;
+        font-size: .98rem;
+        height: 1.5rem;
+        line-height: 1.5rem;
+        padding: 10px 45px 10px 40px !important;
+    }
+
+    .iconfont {
+        position: absolute;
+        font-size: 1.2rem;
+        top: 10px;
+        left: 8px;
+        color: #999
+    }
+
+    .icon-mima {
+        left: 6px;
+        font-size: 1.4rem;
+        color: #888;
+    }
+
+    .account::before,
+    .password::before {
+        content: '';
+        position: absolute;
+        top: 41px;
+        right: 4.5;
+        width: 91%;
+        border-bottom: 1px solid #cccccc;
+        -webkit-transform-origin: 0 0;
+        transform-origin: 0 0;
+        -webkit-transform: scaleY(0.4);
+        transform: scaleY(.4);
+        box-sizing: border-box;
+    }
+
+    .dele1 {
+        position: absolute;
+        top: 9px;
+        right: 25px;
+        color: #bbb;
+        font-size: .74rem;
+    }
+
+    .submit {
+        position: relative;
+        width: 80%;
+        text-align: center;
+        margin: 50px auto 20px auto;
+    }
+
+    .submit div {
+        margin: 0 10px;
+        height: 35px;
+        line-height: 35px;
+        color: #ffffff;
+        border-radius: 5px;
+        background-color: #009688;
+    }
+
+    .forget {
+        width: 100%;
+        font-size: .91rem;
+        color: #999;
+        display: flex;
+    }
+
+    .forget div {
+        display: block;
+        width: 100%;
+    }
+
+    .forget div:nth-child(1) {
+        text-align: right;
+    }
+
+    .forget div:nth-child(2) {
+        text-align: center;
+        width: 30%;
+        color: #ddd;
+    }
+
+    .forget div:nth-child(3) {
+        color: #009688;
+    }
+</style>
+
+<body>
+    <div id="logup">
+        <img src="../img/m2.jpg" alt="" width="100%" height="200px">
+        <div class="logo">
+            <span>L&nbsp;O&nbsp;G&nbsp;I&nbsp;N</span>
+            <p>登录</p>
+        </div>
+        <div class="log">
+            <div class="account">
+                <i class="iconfont icon-xingmingyonghumingnicheng"></i>
+                <input type="text" placeholder="手机号/用户名" v-model="account" />
+                <span class="dele1" v-show="account != ''" @click="account = ''">&#10005;</span>
+            </div>
+        </div>
+        <div class="log">
+            <div class="password">
+                <i class="iconfont icon-mima"></i>
+                <input type="password" placeholder="密码" v-model="password" @keyup.13="loginUp" />
+                <span class="dele1" v-show="password != ''" @click="password = ''">&#10005;</span>
+            </div>
+        </div>
+        <div class="submit" @click="loginUp">
+            <div @touchstart="back = '#05867a'" @touchend="back = '#069687'" :style="{backgroundColor:back}">登录</div>
+        </div>
+        <div class="forget">
+            <div>
+                <span @click="forget">忘记密码?</span>
+            </div>
+            <div> | </div>
+            <div>
+                <span @click="login">注册</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/js/vue.js"></script>
+    <script src="../static/js/mui.min.js"></script>
+    <script>
+        //  返回逻辑
+        mui.back = function () {
+            plus.runtime.quit();
+        };
+
+
+        var vm = new Vue({
+            el: '#logup',
+            data: {
+                account: '',
+                password: '',
+                back: '',
+                oIndex: 0
+            },
+            mounted() {
+                mui.plusReady(function () {
+                    mui.init()
+                });
+            },
+            methods: {
+                loginUp() {
+                    let self = this
+                    console.log(this.account+"==="+ this.password)
+                    mui.ajax(URL + 'Login', {
+                        data: {
+                            account_name: self.account,
+                            account_pass: self.password
+                        },
+                        dataType: 'json', //服务器返回json格式数据
+                        type: 'post', //HTTP请求类型
+                        success: function (data) {
+                            console.log(JSON.stringify(data.data))
+                            if (data.error == 0) {
+                                if (data.data.authority_info.account_state == 0) {
+                                    plus.nativeUI.toast("该账号已被停用!")
+                                } else if (data.data.authority_info.account_state == 1) {
+                                    //  正在审核中
+                                    mui.openWindow('notice.html')
+                                } else if (data.data.authority_info.account_state == 2) {
+                                    //  登录成功
+                                    let c = setCreateWindow('selectAuth.html', 'selectAuth.html', '权限选择')
+                                    mui.fire(c, 'refresh', {
+                                        goodsInfo: data.data
+                                    });
+                                    plus.webview.currentWebview().close()
+                                } else if (data.data.authority_info.account_state == 3){
+                                    //  审核不通过 让用户修改数据重新上传
+                                    plus.nativeUI.toast("审核不通过!")
+                                    mui.openWindow('settingUserInfo.html')
+                                }
+                                
+                            } else {
+                                plus.nativeUI.toast("用户名或密码错误！")
+                            }
+                        },
+                        error: function (xhr, type, errorThrown) {
+                            console.log("接口异常" + type);
+                        }
+                    })
+                },
+                setShop() {
+                    mui.ajax(URL + 'Index', {
+                        data: {
+                            shop_id: 1
+                        },
+                        dataType: 'json', //服务器返回json格式数据
+                        type: 'post', //HTTP请求类型
+                        success: function (data) {
+                            console.log(data.data)
+                            if (data.error == 0) {
+                                //  验证为登录
+                                localStorage.setItem('shopID',1)
+                                console.log(data.data)
+                            }
+                        },
+                        error: function (xhr, type, errorThrown) {
+                            console.log("接口异常" + type);
+                        }
+                    })
+                },
+                forget() {
+                    this.oIndex++
+                    let self = this
+                    if (self.oIndex < 2) {
+                        plus.webview.open('forget.html', 'forget.html', {}, 'slide-in-right', 300)
+                        setTimeout(() => {
+                            self.oIndex = 0
+                        }, 1000);
+                    }
+                },
+                login() {
+                    this.oIndex++
+                    let self = this
+                    if (self.oIndex < 2) {
+                        plus.webview.open('logup.html','logup.html',{},'slide-in-right',300)
+                        setTimeout(() => {
+                            self.oIndex = 0
+                        }, 1000);
+                    }
+                }
+            }
+        })
+
+    </script>
+</body>
+
+</html>

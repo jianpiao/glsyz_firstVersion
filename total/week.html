@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>今天收益</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<!--<link rel="stylesheet" href="css/mui.min.css">-->
+	<link rel="stylesheet" href="../static/fonts/left/iconfont.css">
+	<!--<link rel="stylesheet" href="css/main.css">-->
+</head>
+<style type="text/css">
+	body {
+		margin: 0;
+		background-color: rgba(0, 0, 0, .05)
+	}
+
+	.today-income {
+		width: 100%;
+		min-height: 100px;
+		padding: 12px 0;
+		background-color: #ffffff;
+		box-shadow: 0 1px 1px #dddddd, 0 0 1px #dddddd;
+	}
+
+	.today-income div {
+		display: flex;
+	}
+
+	.his-order-num,
+	.his-order-income {
+		text-align: center;
+	}
+
+	#his-income {
+		font-size: 3.5rem;
+	}
+
+	.his-order-num div,
+	.his-order-income div {
+		height: 50px;
+		line-height: 50px;
+		margin: 0 auto;
+		color: #009688;
+	}
+
+	.his-success div,
+	.his-fail div,
+	.order-price div {
+		padding: 0 12px 0 12px;
+		height: 25px;
+		line-height: 25px;
+		font-size: .94rem;
+	}
+
+	.his-success div:nth-child(1),
+	.his-fail div:nth-child(1),
+	.order-price div:nth-child(1) {
+		width: 50%;
+	}
+
+	.his-success div:nth-child(2),
+	.his-fail div:nth-child(2),
+	.order-price div:nth-child(2) {
+		width: 50%;
+		text-align: right;
+		display: block;
+	}
+
+
+	footer {
+		margin: 8px auto 0 auto;
+		display: flex;
+		background-color: #f6f6f6;
+		-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.09), 0 0 20px rgba(0, 0, 0, 0.05) inset;
+		-moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.09), 0 0 20px rgba(0, 0, 0, 0.05) inset;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.09), 0px 0px 20px rgba(0, 0, 0, 0.05) inset;
+	}
+
+	.today,
+	.mouth {
+		width: 100%;
+		text-align: center;
+		height: 50px;
+		padding: 10px 0 0 0;
+		background-color: #FFFFFF;
+	}
+
+	.today {
+		border-right: 1px solid #eeeeee;
+	}
+
+	.today span:nth-child(1),
+	.mouth span:nth-child(1) {
+		font-size: 1.3rem;
+		color: #0DA994;
+		font-weight: 700;
+	}
+
+	.today span:nth-child(3),
+	.mouth span:nth-child(3) {
+		font-size: .8rem;
+		color: rgba(0, 0, 0, .6);
+	}
+
+	.chart {
+		height: 200px;
+		margin: 0px;
+		padding: 0px;
+	}
+
+	h5 {
+		margin-top: 30px;
+		font-weight: bold;
+		text-indent: 8px;
+		color: #AAAAAA;
+	}
+
+	h5:first-child {
+		margin-top: 15px;
+	}
+
+	h2 {
+		text-align: center;
+		color: #444444;
+	}
+
+	.iconfont {
+		margin-left: 12px;
+		line-height: 44px;
+	}
+</style>
+
+<body>
+	<div class="today-income">
+		<div class="his-order-income">
+			<div>
+				<span id="his-income"></span>￥
+			</div>
+		</div>
+		<div class="his-order-num">
+			<div>
+				<span id="order-quantity"></span>
+				<span class="order-quantity-unit">/单</span>
+			</div>
+		</div>
+		<div class="his-fail">
+			<div>外卖费</div>
+			<div>
+				<span id="his-out"></span>/￥</div>
+		</div>
+		<div class="his-fail">
+			<div>打包费</div>
+			<div>
+				<span id="his-pak"></span>/￥</div>
+		</div>
+	</div>
+	<footer>
+		<div class="today">
+			<span>今日局势</span>
+			<br/>
+			<span>查看今日销售详情</span>
+		</div>
+		<div class="mouth">
+			<span>本月订单</span>
+			<br/>
+			<span>查看每月销售详情</span>
+		</div>
+	</footer>
+	<div class="mui-content-padded">
+		<h5>本周销量王</h5>
+		<div class="chart" id="pieChart"></div>
+	</div>
+</body>
+
+</html>
+
+<script src="../static/js/mui.min.js"></script>
+<script src="../static/js/echarts-all.js"></script>
+<script type="text/javascript">
+	window.onload = function () {
+		//从服务器获取数据  
+		// 今天销售情况
+		mui.ajax(beforePath + shopManagePath + 'WeekStatistics', {
+			data: '',
+			dataType: 'json', //服务器返回json格式数据
+			type: 'post', //HTTP请求类型
+			timeout: 10000, //超时时间设置为10秒；
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			success: function (data) {
+				console.log(data.data)
+				if (data.error == 0) {
+					document.getElementById('order-quantity').innerText = data.data.shop_flow
+					document.getElementById('his-out').innerText = data.data.takeout_fee / 100
+					document.getElementById('his-pak').innerText = data.data.packing_fee / 100
+					document.getElementById('his-income').innerText = data.data.turnover / 100
+
+					var day = [];
+					var orderNum = [];
+					//  遍历这个星期营业的天数
+					for (let n = 0; n < 7; n++) {
+						day[n] = data.data.details.length > n ? data.data.details[n].turnover / 100 : 0
+						orderNum[n] = data.data.details.length > n ? data.data.details[n].shop_flow : 0
+					}
+				} else {
+					document.getElementById('order-quantity').innerText = 0
+					document.getElementById('his-out').innerText = 0
+					document.getElementById('his-pak').innerText = 0
+					document.getElementById('his-income').innerText = 0
+					document.getElementById('his-today').innerText = 0
+				}
+
+			},
+			error: function (xhr, type, errorThrown) {
+				document.getElementById('order-quantity').innerText = 0
+				document.getElementById('his-out').innerText = 0
+				document.getElementById('his-pak').innerText = 0
+				document.getElementById('his-income').innerText = 0
+				document.getElementById('his-today').innerText = 0
+				console.log("总计数据接收异常" + type);
+			}
+		})
+		//业务数据获取完毕，并已插入当前页面DOM；  
+		//注意：若为ajax请求，则需将如下代码放在处理完ajax响应数据之后；  
+		mui.plusReady(function () {
+			//关闭等待框  
+			plus.nativeUI.closeWaiting();
+			//显示当前页面  
+			mui.currentWebview.show();
+		});
+	}
+
+
+	var getOption = function (chartType) {
+		var chartOption = {
+			calculable: false,
+			series: [{
+				name: '销售热门',
+				type: 'pie',
+				radius: '65%',
+				center: ['50%', '50%'],
+				data: [{
+					value: 335,
+					name: '红烧茄子'
+				}, {
+					value: 310,
+					name: '通心粉'
+				}, {
+					value: 234,
+					name: '可乐鸡翅'
+				}, {
+					value: 135,
+					name: '酸甜排骨'
+				}, {
+					value: 1548,
+					name: '青椒炒牛肉'
+				}]
+			}]
+		}
+		return chartOption;
+	};
+	var byId = function (id) {
+		return document.getElementById(id);
+	};
+	var pieChart = echarts.init(byId('pieChart'));
+	pieChart.setOption(getOption('pie'));
+
+
+
+	//  今日
+	document.getElementsByClassName('today')[0].addEventListener('tap', function () {
+		setOpenWindow('today.html', 'today.html', '今日收益')
+		plus.nativeUI.showWaiting();
+	})
+
+	//  本月
+	document.getElementsByClassName('mouth')[0].addEventListener('tap', function () {
+		setOpenWindow('mouth.html', 'mouth.html', '本月收益')
+		plus.nativeUI.showWaiting();
+	})
+
+	//重写返回逻辑
+	mui.back = function () {
+		plus.webview.currentWebview().close("slide-out-right", 200);
+	}
+</script>

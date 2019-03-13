@@ -1,0 +1,904 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<link href="../static/css/mui.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="../static/css/color.css">
+	<script src="../static/js/vue.js"></script>
+	<script src="../static/js/mui.min.js"></script>
+</head>
+<style type="text/css">
+	body {
+		font-size: .94rem;
+	}
+
+	.mui-table-view .mui-media-object,
+	.carse-picture {
+		max-width: 55px;
+		height: auto;
+	}
+
+	.goodsList>li {
+		position: relative;
+		overflow: hidden;
+		padding: 11px 15px;
+	}
+
+	.goodsList>li>a {
+		position: relative;
+		display: block;
+		overflow: hidden;
+		margin: -9px -15px;
+		padding: inherit;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		color: inherit;
+		color: #777 !important;
+	}
+
+	.goodsList>li::after {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		height: 1px;
+		content: '';
+		-webkit-transform: scaleY(.3);
+		transform: scaleY(.3);
+		background-color: #ccc;
+	}
+
+	.mui-pull-right {
+		width: 73%;
+		height: auto;
+		text-align: right;
+		word-wrap: break-word;
+		white-space: normal;
+		color: #5d5b5b;
+		font-weight: 700;
+	}
+
+	.mui-button-row {
+		padding-bottom: 7px;
+	}
+
+	.button {
+		margin-top: 20px;
+	}
+
+	.delete {
+		height: 35px;
+		line-height: 35px;
+		width: 85%;
+		margin: 20px auto;
+		border-radius: 5px;
+		background-color: #dd524d;
+		color: #ffffff;
+	}
+
+	.submit {
+		height: 35px;
+		line-height: 35px;
+		width: 85%;
+		margin: 20px auto;
+		border-radius: 5px;
+		color: #ffffff;
+		background-color: #0aa793;
+	}
+
+	select {
+		width: 88%;
+		direction: rtl;
+		font-size: 1rem;
+		font-weight: 700;
+		color: #5d5b5b;
+	}
+
+	.mui-table-view-cell>a:not(.mui-btn).mui-active {
+		background-color: #ffffff;
+	}
+
+	/* 双拼 */
+	.double-assort {
+		position: fixed;
+		top: 0;
+		left: 0;
+		height: 50px;
+		width: 100%;
+		background-color: #ffffff;
+		padding: 0 12px;
+		line-height: 50px;
+		z-index: 100;
+		font-weight: 700;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, .1);
+	}
+
+	.mui-table-view-cell {
+		padding: 14px;
+	}
+
+
+	.mui-table-view-cell span:nth-child(3) {
+		position: absolute;
+		top: 0;
+		right: 8px;
+		line-height: 49px;
+	}
+
+	/* 双拼 */
+	.double-list {
+		margin-top: 60px;
+	}
+
+	.feature {
+		font-size: 23px;
+	}
+
+	.price {
+		color: #DD524D;
+	}
+
+	.name {
+		font-weight: 600;
+	}
+
+	.goods-name {
+		font-size: 1rem;
+		color: #DD524D;
+	}
+
+	.submit-double {
+		color: #0aa793;
+		float: right;
+	}
+
+	/* 设置持续时间和动画函数 */
+	.fade-enter-active {
+		transition: all .2s ease;
+	}
+
+	.fade-leave-active {
+		transition: all 0;
+	}
+
+	.fade-enter,
+	.fade-leave-to {
+		transform: translateX(20px);
+		opacity: 0;
+	}
+
+	/* 数组为空时候显示的提示 */
+	.number-zore {
+		width: 100%;
+		height: 50px;
+		text-align: center;
+		line-height: 50px;
+		font-size: 1.2rem;
+		color: #aaaaaa;
+	}
+
+	/* 添加按钮 */
+	.add {
+		height: 35px;
+		line-height: 35px;
+		width: 85%;
+		margin: 0 auto;
+		border: 1px solid #dddddd;
+		border-radius: 5px;
+		background-color: #ffffff;
+		color: #111111;
+	}
+
+	/* 套餐 */
+	.package-item {
+		margin-top: 15px;
+		font-size: 1rem;
+	}
+	
+	/* 轮播图片 */
+	.detail-carousel {
+        color: #333;
+        font-size: .92rem;
+        width: 70%;
+        float: left;
+	}
+	
+	.delete-carousel {
+        position: absolute;
+        font-size: .77rem;
+        border: 1px solid rgba(212, 85, 85, 0.884);
+        text-align: center;
+        line-height: 26px;
+        color: rgba(212, 85, 85, 0.884);
+        border-radius: 5px;
+        width: 40px;
+        height: 25px;
+        bottom: 4px;
+        left: 15px;
+	}
+
+	.carse-cell {
+		position: relative;
+		padding-bottom: 29px;
+	}
+
+</style>
+
+<body>
+	<div id="info">
+		<template>
+			<!-- 主页内容 -->
+			<div class="list" v-show="show == 1">
+				<!-- 列表内容 -->
+				<ul class="mui-table-view goodsList">
+					<li style="line-height: 42px;" @click="modifyPicture">
+						<a>图片
+							<img class="mui-media-object mui-pull-right" :src="items.goods_image | filterImg" @click.stop="previewImage(items.goods_image)"> </a>
+					</li>
+					<li @click="modify(1,items.goods_name)">
+						<a>商品名
+							<div class="mui-pull-right">{{items.goods_name}}</div>
+						</a>
+					</li>
+					<li @click="modify(2,items.goods_price)">
+						<a>商品价格
+							<div class="mui-pull-right">{{items.goods_price / 100 | priceFilter}}</div>
+						</a>
+					</li>
+					<li>
+						<a>编号
+							<div class="mui-pull-right">{{items.goods_id}}</div>
+						</a>
+					</li>
+					<li @click="modify(3,items.goods_details)">
+						<a>简介
+							<div class="mui-pull-right">{{items.goods_details}}</div>
+						</a>
+					</li>
+					<li @click="modifyGoodsInfo(2,1)">
+						<a>轮播图片
+							<div class="mui-pull-right">{{items.roll_image.length | roll}}</div>
+						</a>
+					</li>
+					<li @click="modifyGoodsInfo(1,1)">
+						<a>套餐类型
+							<div id="type" class="mui-pull-right">
+								&nbsp;&nbsp;
+								<span v-if="items.goods_type.length == 0" v-text="'默认'"></span>
+								<span v-for="item in items.goods_type">{{ item.goods_type_price / 100 | priceFilter}}({{item.goods_type_name}})</span>
+							</div>
+						</a>
+					</li>
+					<li>
+						<a>分类
+							<select v-model="items.shop_goods_category_id">
+								<option v-for="item in classify" :value="item.shop_goods_category_id" v-text="item.shop_goods_category_name"></option>
+							</select>
+						</a>
+					</li>
+					<li @click="modifyGoodsInfo(3,1)">
+						<a>双拼
+							<div class="mui-pull-right">
+								<span>{{ items.associated_goods.length | assort }}</span>
+							</div>
+						</a>
+					</li>
+					<li>
+						<a>主推
+							<select v-model="items.recommend">
+								<option value="1">是</option>
+								<option value="0">否</option>
+							</select>
+						</a>
+					</li>
+					<li>
+						<a>状态
+							<select v-model="items.goods_state">
+								<option value="2">上架</option>
+								<option value="1">下架</option>
+							</select>
+						</a>
+					</li>
+				</ul>
+				<!-- 按钮  -->
+				<div class="mui-button-row button">
+					<div class="delete" @touchstart="del = '#c3413c'" @touchend="del = '#dd524d'" :style="{backgroundColor:del}" @click="deleteGoods">删除</div>
+					<div class="submit" @touchstart="back = '#05867a'" @touchend="back = '#0aa394'" :style="{backgroundColor:back}" @click="submit">提交</div>
+				</div>
+			</div>
+
+
+			<!-- 双拼动画 -->
+			<transition name="fade">
+				<!-- 双拼头部 -->
+				<div class="double-assort" v-show="show == 2">
+					<span class="goods-name">[ {{items.goods_name}} ]</span>
+					<span>双拼 {{itemsLength}} 份</span>
+					<span class="submit-double" @click="submitDouble">确认</span>
+				</div>
+			</transition>
+			<transition name="fade">
+				<!-- 双拼列表 -->
+				<ul class="mui-table-view double-list" v-show="show == 2">
+					<li class="mui-table-view-cell" v-for="(item, index) in listDouble" @click="selectDouble(index,item.goods_id)">
+						<span class="name">{{item.goods_name}}</span>
+						<span class="price">&nbsp;￥{{item.goods_price / 100 | priceFilter}}</span>
+						<span class="feature mui-pull-right">{{item.tag | tagState}}</span>
+					</li>
+				</ul>
+			</transition>
+
+
+			<!-- 轮播图片 -->
+			<transition name="fade">
+				<div id="taocan" v-show="show ==3">
+					<div class="list">
+						<ul class="mui-table-view package-item" v-for="(item,index) in items.goods_type">
+							<p class="number-zore" v-show="items.goods_type.length == 0">暂无套餐类型</p>
+							<li class="mui-table-view-cell" @click="modify(4,item.goods_type_price,index)">
+								<span>价格(元)</span>
+								<span class="mui-pull-right">{{item.goods_type_price /100 | priceFilter}}</span>
+							</li>
+							<li class="mui-table-view-cell" @click="modify(5,item.goods_type_name,index)">
+								<span>套餐类型</span>
+								<span class="mui-pull-right">{{item.goods_type_name}}</span>
+							</li>
+							<div class="mui-button-row">
+								<button type="button" class="mui-btn mui-btn-danger" @click="items.goods_type.splice(index,1)">删除</button>
+							</div>
+						</ul>
+					</div>
+					<div class="mui-button-row button">
+						<div class="add" @touchstart="backAdd = '#f7f7f7'" @touchend="backAdd = '#ffffff'" :style="{backgroundColor:backAdd}" @click="addPackage">添加</div>
+						<div class="submit" @touchstart="back = '#05867a'" @touchend="back = '#069687'" :style="{backgroundColor:back}" @click="submitPackage">确认</div>
+					</div>
+				</div>
+			</transition>
+
+
+			<!-- 轮播图片 -->
+			<transition name="fade">
+				<div v-show="show == 4">
+					<ul class="mui-table-view">
+						<p class="number-zore" v-if="items.roll_image.length == 0">暂无轮播图片</p>
+						<li class="mui-table-view-cell carse-cell" v-for="(item,index) in items.roll_image">
+							<div class="delete-carousel" @click="delCarousel(index)">删除</div>
+							<div class="detail-carousel" @click="modify(6,item.goods_roll_synopsis,index)">{{item.goods_roll_synopsis | detailFilter}}</div>
+							<img :src="item.goods_roll_image | filterImg" alt="" class="mui-pull-right carse-picture" @click.stop="modifyPicture('carse',index)">
+						</li>
+						<div class="mui-button-row button">
+							<div class="add" @touchstart="backAdd = '#f7f7f7'" @touchend="backAdd = '#ffffff'" :style="{backgroundColor:backAdd}" @click="modifyPicture('add')">添加</div>
+							<div class="submit" @touchstart="back = '#05867a'" @touchend="back = '#069687'" :style="{backgroundColor:back}" @click="show = 1">确认</div>
+						</div>
+					</ul>
+				</div>
+			</transition>
+		</template>
+	</div>
+
+	<script type="text/javascript">
+		//  页面标志
+		var pageIndex = null;
+
+		//自定义窗体事件 刷新事件 要和子页面定义的 事件名称一致   
+		window.addEventListener('refresh', function (e) {
+			plus.nativeUI.closeWaiting()
+			pageIndex = e.detail.page
+			vm.classify = e.detail.goodsCategoryList
+			vm.items = e.detail.goodsInfo
+			
+			vm.items.roll_image = vm.items.roll_image == undefined ? [] : vm.items.roll_image
+			vm.items.associated_goods = vm.items.associated_goods == undefined ? [] : vm.items.associated_goods
+			vm.items.goods_type = vm.items.goods_type == undefined ? [] : vm.items.goods_type
+//			console.log(vm.items.roll_image)
+		});
+
+
+		var vm = new Vue({
+			el: '#info',
+			data: {
+				items: {
+					goods_image: '',
+					goods_type: [],
+					associated_goods: [],
+					roll_image: [],
+					recommend: '',
+					goods_state: '',
+					shop_goods_category_id: ''
+				},
+				listDouble: [],
+				del: '',
+				back: '',
+				backAdd: '',
+				classify: '',
+				show: 1
+			},
+			created() {
+				this.getAjax()
+			},
+			computed: {
+				itemsLength() {
+					return this.listDouble.filter(item => item.tag == true).length
+				}
+			},
+			methods: {
+				modifyPicture(c,i) {
+					c == 'carse' ? uploadPicture(c, i) : updataPicture(c, i)
+				},
+				previewImage(v) {
+					// 图片预览
+					plus.nativeUI.previewImage([
+						v == '' ? '../img/img.jpg' : PicPath + 'goods_image/' + v
+					], {
+							current: 0,
+							loop: true,
+						});
+				},
+				modify(t, v, i) {
+					//  弹出对话框
+					modifyInfo(t, v, i)
+				},
+				modifyGoodsInfo(i, v) {
+					if (i == 1) {
+						this.show = 3
+					} else if (i == 2) {
+						this.show = 4
+					} 
+					else if (i == 3) {
+						this.show = 2
+					}
+				},
+				deleteGoods() {
+					deleteGoods_(this.items.goods_id)
+				},
+				submit() {
+					let self = this
+					plus.nativeUI.confirm("确认提交信息", function (e) {
+						if (e.index == 0) {
+							plus.nativeUI.showWaiting("请稍候...")
+							setGoodsInfo(self.items)
+						}
+					});
+				},
+				//  双拼 事件
+				getAjax() {
+					let self = this
+					mui.post(URL + 'GetGoodsName', function (data) {
+						if (data.error == 0) {
+							let dou = self.items.associated_goods
+							let con = data.data
+							for (let i in con) {
+								//  把请求到的内容传到新的数组并且添加一个goods_tag字段
+								self.listDouble.push({
+									goods_name: con[i].goods_name,
+									goods_id: con[i].goods_id,
+									goods_price: con[i].goods_price,
+									tag: false
+								})
+								//  判断父页面传来的双拼值是否包含
+								//  如果有双拼值
+								if (dou.length > 0) {
+									//  遍历双拼的值  并且和 请求到的值进行比较  看是否有相同的  
+									for (let n in dou) {
+										//  如果有相同的值就改变tag变量 
+										if (con[i].goods_id == dou[n].goods_id) {
+											self.listDouble[i].tag = true
+										}
+									}
+								}
+							}
+						}
+					})
+				},
+				submitDouble() {
+					let self = this
+					//  提交双拼先清空数组
+					this.items.associated_goods = []
+					for (let i in self.listDouble) {
+						if (self.listDouble[i].tag) {
+							self.items.associated_goods.push({
+								goods_id: self.listDouble[i].goods_id,
+								goods_name: self.listDouble[i].goods_name,
+								goods_price: self.listDouble[i].goods_price
+							})
+						}
+					}
+					this.show = 1
+				},
+				selectDouble(i, v) {
+					let self = this
+					self.listDouble[i].tag = !self.listDouble[i].tag
+				},
+				//  套餐事件
+				addPackage() {
+					let self = this
+					this.items.goods_type.push({
+						goods_id: self.items.goods_id,
+						goods_type_id: 0,
+						goods_type_name: '',
+						goods_type_price: ''
+					})
+				},
+				submitPackage() {
+					let self = this
+					let ab = 0
+					//  遍历数据检查不为空就++
+					for (let i in self.items.goods_type) {
+						if (self.items.goods_type[i].goods_type_name != '' && self.items.goods_type[i].goods_type_price != '') {
+							ab++
+						}
+					}
+					// 	数据判断如果不为空的长度等于数组的长度就代表正确并且退出否则提示
+					if (ab == self.items.goods_type.length) {
+						self.show = 1
+					} else {
+						plus.nativeUI.toast("数据不能为空！")
+					}
+				},
+				//   轮播图片
+				delCarousel(i) {
+					//  删除节点
+					this.items.roll_image.splice(i, 1)
+				},
+			},
+			filters: {
+				priceFilter(v) {
+					return getFloatStr(v)
+				},
+				filterImg(v) {
+					return v == '' ? '../img/img.jpg' : PicPath + 'goods_image/' + v
+				},
+				assort(v) {
+					return '可拼' + v + '个商品'
+				},
+				roll(v) {
+					return v + '张'
+				},
+				tagState(v) {
+					return v == true ? '√' : ''
+				},
+				detailFilter(c) {
+					return c == '' ? '填写内容...' : c
+				}
+			}
+		})
+
+
+
+		//重写返回逻辑
+		mui.back = function () {
+			if (vm.show != 1) {
+				vm.show = 1
+			} else {
+				plus.webview.currentWebview().close("slide-out-right", 200)
+			}
+		}
+
+
+		//  删除商品
+		function deleteGoods_(id) {
+			plus.nativeUI.confirm("确认删除信息", function (e) {
+				if (e.index == 0) {
+					plus.nativeUI.showWaiting("删除中...")
+					mui.post(URL + 'DeleteGoods', {
+						goods_id: id
+					}, function (data) {
+						if (data.error == 0) {
+							plus.nativeUI.closeWaiting()
+							plus.nativeUI.toast('删除成功');
+							let view = pageIndex == 1 ? plus.webview.getWebviewById('manage.html') : plus.webview.getWebviewById('setGoodsInfo.html')
+							mui.fire(view, 'refr', {
+								num: pageIndex
+							});
+							mui.back()
+						} else {
+							plus.nativeUI.toast('删除失败');
+						}
+					})
+				}
+			})
+		}
+
+
+
+		//  设置商品信息
+			function setGoodsInfo(v) {
+				mui.post(URL + 'SetGoodsInfo', {
+					goods_id: v.goods_id,
+					goods_name: v.goods_name,
+					system_category_id: v.system_category_id,
+					shop_goods_category_id: v.shop_goods_category_id,
+					goods_price: v.goods_price,
+					goods_details: v.goods_details,
+					goods_image: v.goods_image = v.goods_image == '' ? 'index.jpg' : v.goods_image,
+					roll_image: JSON.stringify(v.roll_image),
+					goods_type: JSON.stringify(v.goods_type),
+					goods_state: v.goods_state,
+					recommend: v.recommend,
+					associated_goods: JSON.stringify(v.associated_goods)
+				}, function (data) {
+					if (data.error == 0) {
+						plus.nativeUI.closeWaiting()
+						plus.nativeUI.toast('商品修改成功');
+						let view = pageIndex == 1 ? plus.webview.getWebviewById('manage.html') : plus.webview.getWebviewById('setGoodsInfo.html')
+						mui.fire(view, 'refr', {
+							num: pageIndex
+						});
+						mui.back()
+					} else {
+						plus.nativeUI.closeWaiting();
+						plus.nativeUI.toast('提交数据有误！');
+					}
+				});
+			}
+
+
+		//  弹出对话框框
+		function modifyInfo(tag, content, index) {
+			if (tag == 1 || tag == 3 || tag == 5 || tag == 6) {
+				// 弹出输入对话框
+				let a, b, c = ''
+				a = tag == 1 || 5 ? "新的商品名" : "商品介绍"
+				b = '输入内容'
+				if (tag == 1 || tag == 3) {
+					a = "新的商品名"
+				} else if (tag == 5) {
+					a = "商品介绍"
+				} else if (tag == 6) {
+					a = "轮播图简介"
+				}
+
+				plus.nativeUI.prompt(a, function (e) {
+					if (e.index == 0 && e.value != '') {
+						if (tag == 1) {
+							vm.items.goods_name = e.value
+						} else if (tag == 3) {
+							vm.items.goods_details = e.value
+						} else if (tag == 5) {
+							vm.items.goods_type[index].goods_type_name = e.value
+						} else if (tag == 6) {
+							vm.items.roll_image[index].goods_roll_synopsis = e.value
+						}
+					};
+				}, b, content, ["确定", "取消"]);
+			} else if (tag == 2 || tag == 4) {
+				// 弹出输入对话框
+				plus.nativeUI.prompt("默认价格", function (e) {
+					if (e.index == 0 && e.value != '') {
+						if (validate(e.value) && e.value > 0) {
+							if (tag == 2) {
+								vm.items.goods_price = e.value * 100
+							} else if (tag == 4) {
+								vm.items.goods_type[index].goods_type_price = e.value * 100
+							}
+						} else {
+							plus.nativeUI.toast('请输入数字,并且不能为0');
+						}
+					};
+				}, "修改价格", getFloatStr(content / 100), ["确定", "取消"]);
+			}
+		}
+
+
+
+		//  价格数字验证
+		function validate(num) {
+			var reg = /^\d+(?=\.{0,1}\d+$|$)/
+			return reg.test(num);
+		}
+
+
+
+		/*设置商品图片*/
+		function updataPicture(c,i) {
+			if (mui.os.plus) {
+				var a = [{
+					title: "拍照"
+				}, {
+					title: "从手机相册选择"
+				}];
+				plus.nativeUI.actionSheet({
+					cancel: "取消",
+					buttons: a
+				}, function (b) { /*actionSheet 按钮点击事件*/
+					switch (b.index) {
+						case 0:
+							break;
+						case 1:
+							getImage(c,i); /*拍照*/
+							break;
+						case 2:
+							galleryImg(c,i); /*打开相册*/
+							break;
+						default:
+							break;
+					}
+				})
+			}
+		}
+
+
+
+		/*设置轮播商品图片*/
+		function uploadPicture(i) {
+			if (mui.os.plus) {
+				var a = [{
+					title: "拍照"
+				}, {
+					title: "从手机相册选择"
+				}, {
+					title: '预览图片'
+				}];
+				plus.nativeUI.actionSheet({
+					cancel: "取消",
+					buttons: a
+				}, function (b) { /*actionSheet 按钮点击事件*/
+					switch (b.index) {
+						case 0:
+							break;
+						case 1:
+							getImage(i); /*拍照*/
+							break;
+						case 2:
+							galleryImg(i); /*打开相册*/
+							break;
+						case 3:
+							previewImage(i)
+							break;
+						default:
+							break;
+					}
+				})
+			}
+		}
+
+
+
+		//拍照
+		function getImage(c,i) {
+			var cmr = plus.camera.getCamera();
+			var res = cmr.supportedImageResolutions[0];
+			var fmt = cmr.supportedImageFormats[0];
+			cmr.captureImage(function (path) {
+				//plus.io.resolveLocalFileSystemURL(path, function(entry) {  
+				plus.io.resolveLocalFileSystemURL(path, function (entry) {
+					plus.nativeUI.showWaiting("上传中...")
+					var path = entry.toLocalURL() + "?version=" + new Date().getTime();
+					updataHead(c,i, path);
+				}, function (err) {
+					console.error("拍照失败：" + err.message);
+				}, {
+						index: 1
+					});
+			});
+		}
+
+
+
+		//本地相册选择
+		function galleryImg(c,i) {
+			plus.gallery.pick(function (a) {
+				plus.io.resolveLocalFileSystemURL(a, function (entry) {
+					plus.io.resolveLocalFileSystemURL("_doc/", function (root) {
+						root.getFile("head.png", {}, function (file) {
+							//文件已存在
+							file.remove(function () {
+								console.log("file remove success");
+								entry.copyTo(root, 'head.png', function (e) {
+									plus.nativeUI.showWaiting("上传中...");
+									let path = e.fullPath + "?version=" + new Date().getTime();
+									updataHead(c,i,path); /*上传图片*/
+									//变更大图预览的src
+									//目前仅有一张图片，暂时如此处理，后续需要通过标准组件实现
+								}, function (e) {
+									console.log('copy image fail:' + e.message);
+								});
+							}, function () {
+								console.log("delete image fail:" + e.message);
+							});
+						}, function () {
+							//文件不存在
+							entry.copyTo(root, 'head.png', function (e) {
+								plus.nativeUI.showWaiting("上传中...");
+								let path = e.fullPath + "?version=" + new Date().getTime();
+								updataHead(c,i,path); /*上传图片*/
+							}, function (e) {
+								console.log('copy image fail:' + e.message);
+							});
+						});
+					}, function (e) {
+						console.log("get _www folder fail");
+					})
+				}, function (e) {
+					console.log("读取拍照文件错误：" + e.message);
+				});
+			}, function (a) { }, {
+					filter: "image"
+				})
+		};
+
+
+
+
+		//上传图片
+		function updataHead(carse,index,imgPath) {
+			var image = new Image();
+			image.src = imgPath;
+			image.onload = function () {
+				var imgData = getBase64Image(image);
+				if (carse == 'carse' || carse == 'add') {
+					carsePicture(carse,index,imgData)
+				} else {
+					goodsPicture(imgData)
+				}
+			}
+		}
+
+
+		//  商品图片上传
+		function goodsPicture(imgData) {
+			mui.post(URL + 'UpGoodsImage',
+				{
+					image: imgData
+				}, function (data) {
+					plus.nativeUI.closeWaiting()
+					if (data.error == 0) {
+						vm.items.goods_image = data.data
+					} else {
+						plus.nativeUI.toast('上传失败');
+					}
+				});
+		}
+
+
+		//  上传轮播图
+		function carsePicture(carse,index,imgData) {
+			mui.post(URL + 'UpRollImage',
+				{
+					image: imgData,
+					synopsis: carse != 'add' ? vm.items.roll_image[index].goods_roll_synopsis : ''
+				}, function (data) {
+					plus.nativeUI.closeWaiting()
+					if (data.error == 0) {
+						if (carse == 'add') {
+							//  轮播图添加
+							vm.items.roll_image.push({
+								goods_roll_id: data.data.goods_roll_id,
+								goods_roll_image: data.data.image,
+								goods_roll_synopsis: ''
+							})
+						} else {
+							//  修改轮播图
+							vm.items.roll_image[index].goods_roll_image = data.data.image
+							vm.items.roll_image[index].goods_roll_id = data.data.goods_roll_id
+						}
+					} else {
+						plus.nativeUI.toast('上传失败');
+					}
+				});
+		}
+
+
+
+		//将图片压缩转成base64
+		function getBase64Image(img) {
+			var canvas = document.createElement("canvas");
+			canvas.getAttribute('class', 'var canvas')
+			//			var canvas = document.getElementsByTagName('var canvas');
+			var width = img.width;
+			var height = img.height;
+			canvas.width = 600; /*设置新的图片的宽度*/
+			canvas.height = height / (width / 600); /*设置新的图片的长度*/
+			var ctx = canvas.getContext("2d");
+			ctx.drawImage(img, img.x, img.y, 600, height / (width / 600)); /*绘图*/
+			var dataURL = canvas.toDataURL("image/png");
+			console.log(dataURL.length)
+			return dataURL
+		}
+	</script>
+</body>
+
+</html>

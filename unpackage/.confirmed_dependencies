@@ -1,0 +1,217 @@
+{
+  "index.html": {
+    "resources": [
+      "newOrder.html",
+      "fonts/left/iconfont.css",
+      "static/fonts/left/iconfont.css",
+      "manage.html"
+    ],
+    "refer": [
+      "me.html",
+      "manage.html",
+      "total.html",
+      "newOrder.html"
+    ]
+  },
+  "newOrder.html": {
+    "refer": [
+      "index/order-detail.html",
+      "index/done.html",
+      "me/print.html",
+      "login/login.html",
+      "index/search.html",
+      "index/delivery.html",
+      "index/cleanWare.html"
+    ],
+    "resources": [
+      "fonts/left/iconfont.css",
+      "static/js/mui.min.js",
+      "static/fonts/left/iconfont.css",
+      "static/js/test.js",
+      "static/js/vue.js",
+      "static/css/mui.min.css"
+    ]
+  },
+  "me.html": {
+    "refer": [
+      "me/shop-info.html",
+      "login/notice.html",
+      "me/about.html",
+      "login/login.html",
+      "me/setting.html",
+      "me/feedback.html",
+      "me/print.html",
+      "me/account-setting.html",
+      "me/setShopInfo.html"
+    ],
+    "resources": [
+      "static/fonts/left/iconfont.css"
+    ]
+  },
+  "total.html": {
+    "refer": [
+      "total/mouth.html",
+      "total/transactions.html",
+      "total/today.html",
+      "total/income.html",
+      "index/search.html",
+      "total/week.html",
+      "total/year.html"
+    ],
+    "resources": [
+      "fonts/left/iconfont.css",
+      "static/fonts/left/iconfont.css"
+    ]
+  },
+  "total/mouth.html": {
+    "refer": [
+      "total/today.html",
+      "total/chart.html"
+    ],
+    "resources": []
+  },
+  "total/transactions.html": {
+    "refer": [
+      "index/search-order-detail.html"
+    ],
+    "resources": []
+  },
+  "manage/childAccount.html": {
+    "refer": [
+      "manage/childAccountDetail.html",
+      "index/accSearch.html"
+    ],
+    "resources": []
+  },
+  "manage.html": {
+    "refer": [
+      "manage/childAccount.html",
+      "manage/setSingleCommInfo.html",
+      "index/search.html",
+      "manage/setGoodsInfo.html",
+      "manage/setUpDown.html",
+      "manage/backOrder.html",
+      "manage/setFeature.html",
+      "manage/setCarouselPicture.html",
+      "manage/setClassify.html",
+      "manage/addComm.html",
+      "manage/wallet.html",
+      "manage/doubleAssort.html"
+    ],
+    "resources": [
+      "fonts/left/iconfont.css",
+      "static/fonts/left/iconfont.css"
+    ]
+  },
+  "login/login.html": {
+    "refer": [
+      "login/selectAuth.html",
+      "login/logup.html",
+      "login/settingUserInfo.html",
+      "login/notice.html",
+      "index.html"
+    ]
+  },
+  "login/selectAuth.html": {
+    "refer": [
+      "newOrder.html",
+      "index.html"
+    ]
+  },
+  "login/notice.html": {
+    "refer": [
+      "login/settingUserInfo.html"
+    ]
+  },
+  "total/week.html": {
+    "refer": [
+      "total/today.html",
+      "total/mouth.html"
+    ]
+  },
+  "me/setting.html": {
+    "refer": [
+      "me/account-setting.html",
+      "me/setShopInfo.html"
+    ]
+  },
+  "me/account-setting.html": {
+    "refer": [
+      "login/forget.html"
+    ]
+  },
+  "manage/setCarouselPicture.html": {
+    "refer": [
+      "manage/setCarouselPictureDetail.html"
+    ]
+  },
+  "index/accSearch.html": {
+    "refer": [
+      "manage/childAccountDetail.html",
+      "index/accSearchDetail.html"
+    ]
+  },
+  "manage/setGoodsInfo.html": {
+    "refer": [
+      "manage/setSingleCommInfo.html"
+    ]
+  },
+  "me/setShopInfo.html": {
+    "refer": [
+      "setPicture/setShopBackImg.html"
+    ]
+  },
+  "total/today.html": {
+    "refer": [
+      "total/today-detail.html"
+    ]
+  },
+  "index/search.html": {
+    "refer": [
+      "index/search-order-detail.html"
+    ]
+  },
+  "manage/wallet.html": {
+    "refer": [
+      "manage/withdraw.html",
+      "manage/scanQrCode.html",
+      "manage/withdrawRecord.html"
+    ]
+  },
+  "manage/addComm.html": {
+    "refer": [
+      "manage/setSingleCommPrice.html",
+      "manage/setCarousePicture1.html",
+      "manage/doubleAssort.html"
+    ]
+  },
+  "index/done.html": {
+    "refer": [
+      "index/search-order-detail.html",
+      "me/print.html"
+    ]
+  },
+  "manage/backOrder.html": {
+    "refer": [
+      "manage/backOrderDetail.html",
+      "index/search-order-detail.html"
+    ]
+  },
+  "manage/setSingleCommInfo.html": {
+    "refer": [
+      "manage/setSingleCommPrice.html",
+      "manage/doubleAssort.html",
+      "manage/setCarousePicture1.html"
+    ]
+  },
+  "manage/withdrawRecord.html": {
+    "refer": [
+      "manage/childAccountDetail.html"
+    ]
+  },
+  "manage/doubleAssort.html": {
+    "refer": [
+      "manage/setCarouselPictureDetail.html"
+    ]
+  }
+}

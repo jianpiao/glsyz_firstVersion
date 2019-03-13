@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="stylesheet" type="text/css" href="static/fonts/left/iconfont.css" />
+	<link rel="stylesheet" href="static/css/mui.min.css">
+	<link rel="stylesheet" href="static/css/color.css">
+	<title>我的</title>
+</head>
+
+<style>
+	body {
+		transform: translateZ(0);
+		margin: 0;
+		font-size: 15px;
+	}
+
+
+	.header-name {
+		width: 100%;
+		padding: 40px 0 0 0;
+		border-bottom: 1px solid #ddd;
+		color: #ffffff;
+		text-align: center;
+		background-color: #0aa394;
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+
+	.business-pic {
+		height: 80px;
+		border-radius: 50%;
+		overflow: hidden;
+		margin: 0 0 15px 0;
+	}
+
+	.business-pic div,
+	img {
+		width: 80px;
+		height: 80px;
+		margin: 0 auto;
+		border-radius: 50%;
+	}
+
+	#business-name {
+		font-size: 1.4rem;
+		font-weight: 600;
+	}
+
+	.edit-info {
+		display: flex;
+		background-color: rgba(0, 0, 0, 0.17);
+	}
+
+	.edit-info div {
+		position: relative;
+		width: 100%;
+		height: 40px;
+		line-height: 40px;
+		text-align: center;
+		font-size: .9rem;
+	}
+
+	.edit-info div:nth-child(1)::before {
+		position: absolute;
+		top: 8px;
+		bottom: 0;
+		right: 0;
+		height: 25px;
+		border-right: 1px solid rgba(0, 0, 0, 0.05);
+		content: '';
+		-webkit-transform: scaleX(.3);
+		transform: scaleX(.3);
+		background-color: #ccc;
+	}
+
+	.list {
+		margin-top: 14px;
+		width: 100%;
+		height: 200px;
+		line-height: 30px;
+		background-color: #ffffff;
+	}
+
+	.mui-table-view-cell>a:not(.mui-btn) {
+		margin: -12px -15px;
+	}
+
+	.iconfont {
+		font-size: 18px;
+	}
+
+	.goOutLogin {
+		width: 80%;
+		height: 40px;
+		line-height: 40px;
+		text-align: center;
+		margin: 40px auto 0 auto;
+		color: #000;
+		/* background-color: rgb(199, 47, 47); */
+		border-radius: 5px;
+	}
+
+	.icon-iconfonticonfontjixieqimo,
+	.icon-guanyuwomen {
+		color: #444;
+	}
+</style>
+
+<body>
+	<div class="header-name" id="header-bg-img">
+		<div class="business-info">
+			<p id="business-name"></p>
+			<p id="business-id"></p>
+		</div>
+		<div class="business-pic">
+			<img src="" id="business-img" />
+		</div>
+		<div class="edit-info">
+			<div class="edit-private-info">
+				<i class="iconfont icon-wo"></i>
+				<span>个人信息</span>
+			</div>
+			<div class="edit-shop-info">
+				<i class="iconfont icon-icon-yxj-store"></i>
+				<span>店铺信息</span>
+			</div>
+		</div>
+	</div>
+	<div class="list">
+		<ul class="mui-table-view">
+			<li class="mui-table-view-cell print">
+				<a class="mui-navigate-right">
+					<span class="iconfont icon-dayin"></span> &nbsp; 打印机连接
+				</a>
+			</li>
+			<li class="mui-table-view-cell" id="setting">
+				<a class="mui-navigate-right">
+					<span class="iconfont icon-iconfonticonfontjixieqimo"></span> &nbsp; 设置
+				</a>
+			</li>
+			<li class="mui-table-view-cell" id="natice">
+				<a class="mui-navigate-right">
+					<span class="iconfont icon-xiaoxi"></span> &nbsp; 消息通知
+				</a>
+			</li>
+			<li class="mui-table-view-cell" id="feedback">
+				<a class="mui-navigate-right">
+					<span class="iconfont icon-yijianfankui"></span>&nbsp; 意见反馈
+				</a>
+			</li>
+			<li class="mui-table-view-cell" id="about">
+				<a class="mui-navigate-right">
+					<span class="iconfont icon-guanyuwomen"></span>&nbsp; 关于我们
+				</a>
+			</li>
+			<li class="mui-table-view-cell about" id="back-login">
+				<a class="mui-navigate-right">
+					<span class="iconfont icon-tuichudenglu"></span>&nbsp; 退出登录
+				</a>
+			</li>
+		</ul>
+	</div>
+</body>
+
+</html>
+
+<script src="static/js/mui.min.js"></script>
+<script>
+	var shopInfo = null;
+	var ppIndex = 0;
+	settingTitleNView.type = 'transparent'
+	settingTitleNView.splitLine = { color: '#ddd' }
+	var styleNavtive = {
+		'titleNView': settingTitleNView,
+		"render": "always",
+		"popGesture": "hide",
+		"bounce": "all"
+	}
+
+	//	 设置页面顶部菜单栏
+	var settingTitleNView = {
+		autoBackButton: true,
+		backgroundcolor: '#ffffff',
+		titletext: '',
+		titleSize: '16px',
+		titlecolor: '#000000',
+		type: 'default'
+	}
+
+
+
+	var setStyle = {
+		render: "always",
+		popGesture: "hide",
+		bounce: "vertical",
+		bounceBackground: "#000000",
+		titleNView: titleNView
+	}
+
+
+	mui.init()
+
+	mui.getJSON(beforePath + shopManagePath + 'GetShop', {}, function (data) {
+		if (data.error == 0) {
+			console.log(data.data)
+			shopInfo = data.data
+			document.getElementById("header-bg-img").style.backgroundImage = 'url('+ PicPath + 'shop_back_image/' + data.data.back_image +')'
+			document.getElementById('business-img').src = PicPath + 'shop_image/' + data.data.shop_image
+			document.getElementById('business-name').innerText = data.data.shop_name == null || undefined ? '店铺名' : data.data.shop_name
+			document.getElementById('business-id').innerText = data.data.synopsis == null || undefined ? '简介' : data.data.synopsis
+		} else {
+			document.getElementById('business-img').imgSrc = ''
+			document.getElementById('business-name').innerText = '店铺名'
+			document.getElementById('business-id').innerText = '简介'
+		}
+	});
+
+
+
+	document.getElementById('back-login').addEventListener('tap', function () {
+		// plus.webview.open('login/login.html')
+		plus.nativeUI.confirm("确认退出？", function (e) {
+			if (e.index == 0) {
+				quit()
+			}
+		});
+	})
+
+
+	function quit() {
+		mui.post(URL + 'Quit', function (data) {
+			plus.webview.open('login/login.html')
+			console.log(data.data)
+		});
+	}
+
+
+	//  打印
+	document.getElementsByClassName('print')[0].onclick = function () {
+		setOpenWindow('me/print.html', 'print.html', '打印机', 'settingTitleNView')
+	}
+
+	//  店铺信息
+	document.getElementsByClassName('header-name')[0].addEventListener('tap', function () {
+		ppIndex++
+		if (ppIndex < 2) {
+			plus.webview.open('me/shop-info.html', 'shop-info.html', styleNavtive, 'slide-in-right', 200);
+			setTimeout(() => {
+				ppIndex = 0
+			}, 1000);
+		}
+	})
+
+
+	//  编辑个人信息
+	document.querySelector(".edit-private-info").addEventListener('tap',function (e){
+		e.stopPropagation();
+		setOpenWindow('me/account-setting.html', 'account-setting.html', '帐号信息', 'settingTitleNView')
+	})
+
+
+	//  编辑店铺信息
+	document.querySelector(".edit-shop-info").addEventListener('tap', function (e){
+		e.stopPropagation();
+		setOpenWindow('me/setShopInfo.html', 'setShopInfo.html', '店铺信息设置', 'settingTitleNView')
+	})
+
+
+	//  消息通知
+	var ttt = 0;
+	document.getElementById('natice').addEventListener('tap', function () {
+		ttt++
+		if (ttt < 2) {
+			plus.webview.open("login/notice.html", "login/notice.html", {}, 'slide-in-right', 200)
+			setTimeout(() => {
+				ttt = 0
+			}, 1000);
+		}
+	})
+
+	//  设置
+	document.getElementById('setting').onclick = function () {
+		setOpenWindow('me/setting.html', 'setting.html', '设置', 'settingTitleNView')
+	}
+
+	//  反馈
+	document.getElementById('feedback').onclick = function () {
+		setOpenWindow('me/feedback.html', 'feedback.html', '意见反馈', 'settingTitleNView')
+	}
+
+	//  关于
+	document.getElementById('about').onclick = function () {
+		setOpenWindow('me/about.html', 'about.html', '关于我们', 'settingTitleNView')
+	}
+
+</script>
+</body>
+
+</html>

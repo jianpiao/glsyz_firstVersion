@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="HandheldFriendly" content="true" />
+    <link href="../static/css/mui.min.css" rel="stylesheet" />
+    <style type="text/css">
+        body {
+            background-color: #000000;
+        }
+
+        #bcid {
+            top: 44px;
+            width: 100%;
+            position: absolute;
+            bottom: 0px;
+            text-align: center;
+        }
+
+        #tip {
+            word-wrap: break-word;
+            padding: 15px;
+            color: #FFFFFF;
+            font-weight: bold;
+            text-shadow: 0px -1px #103E5C;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="bcid">
+        <div style="height:40%"></div>
+        <p id="tip">...载入中...</p>
+    </div>
+
+    <script src="../static/js/mui.min.js"></script>
+    
+    <script>
+
+
+            var setAccount = ''
+            //监听传入值
+            document.addEventListener('scanQrCode', function (e) {
+                e.detail.num == 1 ? setAccount = 'SetWalletWechatUser' : setAccount = 'SetWechatReceivables'
+            });
+
+
+            mui.init();
+            var scan = null, tip = document.getElementById('tip');
+            mui.plusReady(function () {
+                window.plus = plus;
+                setTimeout(function () {
+                    // 开始扫描
+                    scan = new plus.barcode.Barcode('bcid');
+                    scan.onmarked = onmarked;
+                    scan.start();
+                }, 200);
+            });
+
+
+            // 二维码扫描成功
+            function onmarked(type, result, file) {
+                scan.close();
+
+
+                result = result.replace(/\n/g, '');
+                // tip.innerHTML = '扫描结果：<br/><br/>' + result + '<br/><br/>触摸屏幕继续';
+
+                plus.nativeUI.prompt("密码验证", function (e) {
+                    if (e.index == 0 && e.value != '') {
+                        console.log(setAccount)
+                        mui.get(URL + setAccount, {
+                            pass: e.value,
+                            user_id: result
+                        }, function (data) {
+                            mui.back()
+                            console.log(data.data)
+                            data.error == 0 ? plus.nativeUI.toast("设置成功") : plus.nativeUI.toast("设置失败")
+                        }, 'json'
+                        );
+                    } else {
+                        mui.back()
+                    }
+                }, "请输入登录密码", '输入登录密码', ["确定", "取消"]);
+            };
+    </script>
+
+</body>
+
+</html>

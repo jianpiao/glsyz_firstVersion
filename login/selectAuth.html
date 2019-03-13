@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../static/css/mui.min.css">
+    <script src="../static/js/vue.js"></script>
+    <script src="../static/js/mui.min.js"></script>
+    <title>选择店铺</title>
+</head>
+<style>
+    .mui-pull-right {
+        width: 70%;
+        text-align: right;
+    }
+
+    .mui-table-view {
+        margin-top: 15px;
+    }
+
+    .mui-table-view-cell>a:not(.mui-btn).mui-active {
+        background-color: #ffffff;
+    }
+</style>
+
+<body>
+    <div id="select-auth">
+        <template>
+            <ul class="mui-table-view" v-for="(item,index) in items.authority_info.authority" @click="selectShop(item.shop_id)">
+                <li class="mui-table-view-cell">
+                    <a>
+                        <span>店铺名</span>
+                        <div class="mui-pull-right">{{item.shop_name}}</div>
+                    </a>
+                </li>
+                <li class="mui-table-view-cell">
+                    <a>
+                        <span>店铺编号</span>
+                        <div class="mui-pull-right">{{item.shop_id}}</div>
+                    </a>
+                </li>
+                <li class="mui-table-view-cell">
+                    <a>
+                        <span>权限列表</span>
+                        <div class="mui-pull-right" v-for="au in item.authority">{{au | auth}}</div>
+                    </a>
+                </li>
+                <li class="mui-table-view-cell">
+                    <a>
+                        <span>错误信息</span>
+                        <div class="mui-pull-right" v-for="au in item.authority">{{errorInfo}}</div>
+                    </a>
+                </li>
+            </ul>
+        </template>
+    </div>
+
+    <script>
+        var vm = new Vue({
+            el: '#select-auth',
+            data: {
+                items: '',
+                errorInfo: ''
+            },
+            methods: {
+                selectShop(i) {
+                    let self = this
+                    try{
+	                    mui.ajax(URL + 'Index', {
+	                        data: {
+	                            shop_id: i
+	                        },
+	                        dataType: 'json', //服务器返回json格式数据
+	                        type: 'post', //HTTP请求类型
+	                        success: function (data) {
+	                            console.log(JSON.stringify(data.data))
+	                            if (data.error == 0) {
+	//                          	plus.webview.open("../index.html")
+									plus.nativeUI.toast("重启加载更多资源，请稍后。")
+									plus.runtime.restart()
+	//                              plus.webview.currentWebview().close()
+	                            }
+	                        },
+	                        error: function (xhr, type, errorThrown) {
+	                            console.log("接口异常" + type);
+	                            plus.nativeUI.toast("接口异常" + type)
+	                        }
+	                    })                    	
+                    }catch(e){
+                    	self.errorInfo = e
+                    }
+
+                }
+            },
+            filters: {
+                auth(v) {
+                    if (v == 1) {
+                        return '订单管理'
+                    } else if (v == 2) {
+                        return '店铺信息管理'
+                    } else if (v == 3) {
+                        return '商品管理'
+                    } else if (v == 4) {
+                        return '统计管理'
+                    } else if (v == 5) {
+                        return '子管理员管理'
+                    }
+                }
+            }
+        })
+
+
+        window.addEventListener('refresh', function (e) {
+            vm.items = e.detail.goodsInfo
+        })
+    </script>
+</body>
+
+</html>

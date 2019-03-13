@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>最新订单</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<link rel="stylesheet" href="static/css/mui.min.css">
+	<link rel="stylesheet" href="static/css/color.css">
+	<link rel="stylesheet" type="text/css" href="static/fonts/left/iconfont.css" />
+</head>
+
+<style>
+	.mui-content {
+		margin-top: 70px;
+	}
+
+	.order-content::after {
+		position: absolute;
+		width: 100%;
+		right: 0;
+		bottom: 0;
+		height: 1px;
+		content: '';
+		-webkit-transform: scaleY(.3);
+		transform: scaleY(.3);
+		background-color: #ccc;
+	}
+
+	.order-content {
+		position: relative;
+		width: 100%;
+		min-height: 100px;
+		margin: 0 auto;
+		background-color: #ffffff;
+		/* box-shadow: 0 1px 1px #dddddd, 0 0 1px #dddddd; */
+		padding: 8px 17px;
+	}
+
+	.history-order {
+		width: 100%;
+		min-height: 100px;
+		margin: 0 auto 12px auto;
+		background-color: #ffffff;
+		/* box-shadow: 0 1px 1px #dddddd, 0 0 1px #dddddd; */
+		padding: 8px 12px;
+	}
+
+	.his-header-time {
+		color: #555555;
+		font-size: .91rem;
+	}
+
+	.history-order>.his-container {
+		margin-top: 10px;
+		width: 100%;
+		display: flex;
+	}
+
+	.his-container div {
+		position: relative;
+		width: 100%;
+		text-align: center;
+		color: #999999;
+		font-size: .87rem;
+	}
+
+	.his-container div span {
+		color: #555555;
+		font-weight: 700;
+		font-size: .92rem;
+	}
+
+	.his-interval {
+		width: 100%;
+		height: 1px;
+		background-color: #cccccc;
+		margin: 6px auto 0 auto;
+	}
+
+	.his-header-time {
+		position: relative;
+	}
+
+	.his-header-time::after {
+		position: absolute;
+		width: 100%;
+		right: 0;
+		bottom: 0;
+		border-bottom: 1px solid rgba(0, 0, 234, .01);
+		content: '';
+		-webkit-transform: scaleY(.3);
+		transform: scaleY(.3);
+		background-color: #ccc;
+	}
+
+	.his-order-num {
+		margin-top: 10px;
+		height: 70px;
+		line-height: 30px;
+	}
+
+	#order-quantity {
+		font-size: 3rem;
+	}
+
+	.mui-control-content {
+		background-color: #efeff4;
+		min-height: 215px;
+	}
+
+	.search {
+		position: fixed;
+		top: 0;
+		z-index: 100;
+		left: 0;
+		height: 70px;
+		width: 100%;
+		color: #fff;
+		/* background-color: #009688; */
+		text-align: center;
+	}
+
+	.search>span:first-child {
+		font-size: 1rem;
+		line-height: 96px;
+		margin: 0 auto;
+	}
+
+	.icon-fangdajing {
+		position: fixed;
+		top: 7px;
+		right: 14px;
+	}
+
+	.info {
+		width: calc(100% - 75px);
+		color: #222;
+		font-size: 1.03rem;
+		font-weight: 700;
+		overflow: hidden;
+		white-space: normal;
+	}
+
+	.order-content p {
+		margin: 0;
+	}
+
+	.order-content p:nth-child(2) {
+		margin: 3px 0 0 0 ;
+	}
+
+	.order-content p:nth-child(2),
+	.order-content p:nth-child(3),
+	.order-content p:nth-child(4),
+	.order-content p:nth-child(5),
+	.order-price {
+		color: #777;
+		font-size: .86rem;
+	}
+
+	.order-foot {
+		height: 33px;
+		position: relative;
+	}
+
+	.order-foot div:nth-child(1) {
+		float: left;
+		width: calc(100% - 90px);
+	}
+
+	.order-foot div:nth-child(2) {
+		float: right;
+		width: 62px;
+		height: 32px;
+	}
+
+	.print {
+		width: 70px;
+		height: 36px;
+		color: #fff !important;
+		border: none !important;
+		font-size: 1rem !important;
+		background-color: #0aa394;
+		box-shadow: 0 1px 1px rgba(0, 0, 0, .1), 0 1px 1px rgba(0, 0, 0, .1);
+	}
+
+	.addre {
+		color: #e44b30;
+	}
+
+	.icon-fangdajing {
+		position: fixed;
+		top: 37px;
+		right: 14px;
+		color: #fff;
+		font-size: 20px;
+	}
+
+	.empty {
+		position: fixed;
+		top: 20px;
+		width: 100%;
+		height: 60px;
+		line-height: 50px;
+		text-align: center;
+		color: #999;
+		font-size: 1.2rem;
+	}
+
+	#inputBack {
+		background-color: #ee9750 !important;
+		color: #fff;
+		border: none;
+	}
+
+	.icon-canju1 {
+		font-size: 23px;
+	}
+
+	.icon-shuju {
+		font-size: 27px;
+	}
+
+	.icon-yizi {
+		font-size: 30px;
+	}
+	
+	.order-class {
+		padding: 3px 5px;
+		border: 1px solid;
+		border-radius: .4rem;
+		font-size: .71rem;
+	}
+
+	.icontag {
+		margin: 0 auto;
+		width: 45px !important;
+		height: 45px !important;
+		line-height: 47px;
+		border-radius: 50%;
+		background-color: #0fad9d;
+	}
+</style>
+
+<body>
+	<div id="main">
+		<div class="search setbgcolor">
+			<span>最新订单</span>
+			<span class="iconfont icon-fangdajing" @click="search()"></span>
+		</div>
+
+		<div class="mui-content">
+			<div class="history-order">
+				<div class="his-container">
+					<div class="con-left" @click="cleanWare">
+						<div class="icontag">
+							<i class="iconfont icon-canju1"></i>
+						</div>
+						<div>待收餐具</div>
+						<div>
+							<goods-info id="waidBack" :content="ware"></goods-info>
+							<span>份</span>
+						</div>
+					</div>
+					<div class="con-middle" @click="openDelivery">
+						<div class="icontag">
+							<i class="iconfont icon-yizi"></i>
+						</div>
+						<div>桌面上菜</div>
+						<div>
+							<goods-info id="income" :content="diliverys"></goods-info>
+							<span>份</span>
+						</div>
+					</div>
+					<div class="done" @click="done">
+						<div class="icontag">
+							<i class="iconfont icon-shuju"></i>
+						</div>
+						<div>已完成</div>
+						<div>
+							<goods-info id="finished" :content="finish"></goods-info>
+							<span>单</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="mui-scroll" id="order-wait">
+				<template>
+					<center class="empty" v-if="items.length == 0">暂无订单</center>
+					<div class="order-content" v-for="(item,index) in items" @click="openDetail(item)">
+						<p class="info">
+							<span v-for="info in item.order_information">{{ info.goods_name }}*{{ info.number }}&nbsp;&nbsp;&nbsp;</span>
+						</p>
+						<p>
+							<span>下单时间:&nbsp;</span>
+							<span>{{ item.date | filterDate}}</span>
+						</p>
+						<p v-if="item.order_type == 1">
+							<span class="span">座位:&nbsp;</span>
+							<span style="color: #55A532;" v-if="item.order_type == 1">{{item.address}}</span>
+						</p>
+						<div class="order-foot">
+							<div>
+								<span class="order-price">总价: ￥{{item.basic_price /100 | priceFilter}}</span>
+							</div>
+							<div>
+								<input type="button" :style="{backgroundColor: item.order_state == 4 ? '#f3571f' : '#0aa394'}" :value="item.order_state != 4 ? '打印' : '退单'" class="print" @click.stop="print(item.order_id,index,item)"
+								/>
+							</div>
+						</div>
+						<p>
+							<span class="order-class" style="color: #55A532;" v-if="item.order_type == 1">{{item.order_type | orderType}}</span>
+							<span class="order-class" style="color: #6641E2;" v-else-if="item.order_type == 2">{{item.order_type | orderType}}</span>
+							<span class="order-class" style="color: #41c6c7;" v-else-if="item.order_type == 3">{{item.order_type | orderType}}</span>
+							<span class="order-class" style="color: #ad32c5;" v-else-if="item.order_type == 4">{{item.order_type | orderType}}</span>
+							<span class="order-class" style="color: #e68932;" v-else>{{item.order_type | orderType}}</span>
+						</p>
+					</div>
+				</template>
+			</div>
+		</div>
+	</div>
+	<script src="static/js/vue.js"></script>
+	<script src="static/js/mui.min.js"></script>
+	<script type="text/javascript" src="static/js/test.js"></script>
+	<script>
+		var setnum = 0;
+		var priIndex = null;
+		var settimeaa = 0;
+		//  进入页面确认登录
+		mui.ajax(URL + 'IsLogin', {
+			data: '',
+			dataType: 'json', //服务器返回json格式数据
+			type: 'post', //HTTP请求类型
+			success: function (data) {
+				console.log(data.data)
+				if (data.error != 0) {
+					plus.webview.open('login/login.html', 'login.html', {}, 'slide-in-right', 200)
+				}
+			},
+			error: function (xhr, type, errorThrown) {
+				// plus.webview.open('login/login.html', 'login.html', {}, 'slide-in-right', 200)
+				console.log("接口异常" + type);
+			}
+		})
+
+		//  初始化
+		mui.init({
+			pullRefresh: {
+				container: "#main", //下拉刷新容器标识，querySelector能定位的css选择器均可，比如：id、.class等
+				down: {
+					style: 'circle', //必选，下拉刷新样式，目前支持原生5+ ‘circle’ 样式
+					color: '#2BD009', //可选，默认“#2BD009” 下拉刷新控件颜色
+					height: '70px', //可选,默认50px.下拉刷新控件的高度,
+					range: '130px', //可选 默认100px,控件可下拉拖拽的范围
+					offset: '70px', //可选 默认0px,下拉刷新控件的起始位置
+					auto: false, //可选,默认false.首次加载自动上拉刷新一次
+					callback: pullfresh //必选，刷新函数，根据具体业务来编写，比如通过ajax从服务器获取新数据；
+				}
+			}
+		});
+
+		//  下拉刷新
+		function pullfresh() {
+			vm.newOrder()
+			vm.todayDone()
+			vm.tableware()
+			mui('#main').pullRefresh().endPulldown();
+		}
+
+
+
+		//  初始化打印机
+		pri()
+		function pri() {
+			mui.plusReady(function () {
+				plus.plugintest.ReturnBluetoothDevice(function (result) {
+					let blue = localStorage.getItem('localSeleceBlusDevice')
+					plus.plugintest.SetBluetooth(blue)
+					plus.nativeUI.toast("打印机初始化成功！")
+					priIndex = blue
+				}, function (result) {
+					alert(result)
+				});
+			})
+		}
+
+
+
+		//  自定义组件
+		Vue.component('goods-info', {
+			template: '<span>{{ content }}</span>',
+			props: ['content']
+		})
+
+		var vm = new Vue({
+			el: '#main',
+			data: {
+				items: '',
+				diliverys: 0, 
+				finish: 0,
+				ware: 0 ,
+				handleState: true
+			},
+			created() {
+				//  定时刷新
+				this.newOrder()
+				this.todayDone()
+				this.tableware()
+				this.dilivery()
+				this.setinter()
+				// setInterval(() => {
+				// 	console.log("剩余窗口数量：" + plus.webview.all().length)
+				// 	var wvs = plus.webview.all();
+				// 	for (var i = 0; i < wvs.length; i++) {
+				// 		console.log('webview' + i + ': ' + wvs[i].getURL());
+				// 	}
+				// },5000)
+			},
+			methods: {
+				setinter() {
+					//  设置定时刷新
+					let self = this
+					setInterval(() => {
+						self.newOrder()
+						self.todayDone()
+						self.tableware()
+						self.dilivery()
+					}, 5000)
+				},
+				//  桌面上菜
+				dilivery() {
+					let self = this
+					mui.post(URL + 'GetServingOrderList', function (data) {
+						self.diliverys = data.data.length
+					});
+				},
+				todayDone() {
+					//  当日已完成头部总数
+					let self = this
+					mui.post(URL + 'GetOrderNumber', function (data) {
+						//  已完成订单数量
+						self.finish = data.data.already_processed
+					});
+				},
+				tableware() {
+					//  餐具
+					let self = this
+					mui.post(URL + 'CollectTableware', function (data) {
+						//  待收餐具
+						self.ware = data.data.count
+					});
+				},
+				newOrder() {
+					let self = this
+					mui.post(URL + 'GetOrderList1', function (data) {
+						if (data.error == 0) {
+							//  订单按照时间排序
+							data.data = data.data.sort(down)
+							//  新订单提醒
+							if (data.data.length > 0) {
+								let a1 = data.data[0].order_id
+								let a2 = self.items.length == 0 || '' ? 0 : self.items[0].order_id
+								if (a1 > a2) {
+									self.items = data.data
+									//  加个新订单提醒
+									newOrderNotice()
+								} else {
+									self.items = data.data
+								}
+							}
+						}
+					});
+				},
+				print(id, index, item) {
+					let self = this
+					console.log(JSON.stringify(item))
+					if (item.order_state == 4) {
+						plus.nativeUI.confirm('是否退单？', function (e) {
+							if (e.index == 0) {
+								ConfirmBack(id,index)
+							} 
+						}, "打印机", ["确认", "取消"]);
+					} else {
+						plus.nativeUI.confirm('是否打印？', function (e) {
+							if (e.index == 0) {
+								//  点击确认
+								if (plus.plugintest.IsOk() == 'OK') {
+									plus.nativeUI.showWaiting()
+									setPrint(id, index, item, 1)
+								} else {
+									setOpenWindow('me/print.html', 'print.html', '打印机', 'settingTitleNView')
+								}
+							} else if (e.index == 1) {
+								//  点击忽略
+								setPrint(id, index, item, 0)
+							}
+						}, "打印机", ["确认", "忽略", "取消"]);
+					}
+				},
+				search() {
+					//  搜索
+					settimeaa++
+					if (settimeaa < 2) {
+						plus.webview.open('index/search.html', 'search.html', {}, 'slide-in-right', 200);
+						setTimeout(() => {
+							settimeaa = 0
+						}, 1500);
+					}
+				},
+				done() {
+					//  已完成
+					setOpenWindow('index/done.html', 'done.html', '今日完成订单')
+				},
+				cleanWare() {
+					//  待收餐具
+					setOpenWindow('index/cleanWare.html', 'cleanWare.html', '待收餐具')
+				},
+				openDetail(item) {
+					//  查看详情
+					let self = this
+					if (this.handleState == true) {
+						this.handleState = false
+						open_detail(item)
+						setTimeout(() => {
+							self.handleState = true
+						}, 1300);
+					}
+				},
+				openDelivery() {
+					// 桌面上菜
+					setOpenWindow('index/delivery.html', 'delivery.html', '桌面上菜')
+				}
+			},
+			filters: {
+				orderType(v) {
+					//  订单类型
+					if (v == 1) {
+						return '桌上点餐'
+					} else if (v == 2) {
+						return '预定点餐'
+					} else if (v == 3) {
+						return '线上点餐'
+					} else if (v == 4) {
+						return '前台点餐'
+					} else {
+						v
+					}
+				},
+				priceFilter(v) {
+					return getFloatStr(v)
+				},
+				filterDate(v) {
+					let a = v.substr(0,10)
+					let b = a.split('-')
+					let c = parseInt(b[0]) + parseInt(b[1]) + parseInt(b[2])
+					let d = new Date()
+					let e = d.getFullYear() + (d.getMonth() + 1) + d.getDate() 
+					if (e == c) {
+						return v
+					} else if ((e - c) == 1) {
+						return v + '  (昨天)'
+					} else if ((e - c) > 1) {
+						return v + '(' + (e - c) + '天前)'
+					}
+				}
+			}
+		})
+
+
+
+
+
+		//  打印
+		function setPrint(id, index, item,st) {
+			console.log(id)
+			mui.post(URL + 'Shipment',{
+				order_id: id
+			}, function (data) {
+				plus.nativeUI.closeWaiting()
+				console.log(data.data)
+				if (data.error == 0) {
+					vm.diliverys++
+					vm.items.splice(index, 1)
+					if (st == 1) {
+						plus.nativeUI.toast(item.order_id + "号 处理订单失败")
+						let Info = localStorage.getItem('shopInfo')
+						plus.plugintest.Print(Info.shopName, Info.shopCard, item);
+					}
+				} else {
+					plus.nativeUI.toast(item.order_id + "号 处理订单失败")
+				}
+			});
+		}
+
+
+
+		//  订单提醒声音
+		function newOrderNotice() {
+			//  加个新订单提醒
+			let p = plus.audio.createPlayer("_www/static/audio/test.mp3");
+			p.play(function () {
+				console.log("通知成功");
+			}, function (e) {
+				console.log("通知失败: " + e.message);
+			});
+			console.log("有新订单")
+		}
+
+		
+
+
+		//  退单
+		function ConfirmBack(id,index) {
+			mui.post(URL + 'ConfirmBack', {
+				order_id: id
+			}, function (data) {
+				if (data.error == 0) {
+					console.log(data.data)
+					if (data.error == 0) {
+						vm.finish++
+						vm.items.splice(index, 1)
+						plus.nativeUI.closeWaiting();
+						plus.nativeUI.toast('退单成功');
+					} else {
+						plus.nativeUI.closeWaiting();
+						plus.nativeUI.toast('退单失败');
+					}
+				}
+			});
+		}
+
+
+
+		//打开详情页面
+		function open_detail(item) {
+			mui.fire(webview_detail, 'searchID', {
+				num: item
+			});
+			webview_detail.show("slide-in-right", 200);
+		}
+
+		//  数组排序
+		function down(x, y) {
+			return (x.date < y.date) ? 1 : -1
+		}
+
+
+		//  获取店铺信息保存打印码
+		mui.post(URL + 'GetShop', function (data) {
+			localStorage.setItem('shopInfo', [{ shopName: data.data.shop_name }, { shopCard: data.data.wx_payment_code }])
+		});
+		
+
+
+		document.addEventListener('newOrder', function (e) {
+			vm.newOrder()
+		});
+
+
+
+		mui.plusReady(function () {
+			//预加载详情页
+			settingTitleNView.titletext = '最新订单详情'
+			webview_detail = mui.preload({
+				url: 'index/order-detail.html',
+				id: 'order-detail.html',
+				styles: settStyle
+			});
+		});
+	</script>
+
+</body>
+
+</html>

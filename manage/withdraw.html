@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../static/css/mui.min.css">
+    <link rel="stylesheet" href="../static/css/mint-css.css">
+    <link rel="stylesheet" href="../static/css/color.css">
+    <script src="../static/js/vue.js"></script>
+    <script src="../static/js/mint.ui.js"></script>
+    <script src="../static/js/mui.min.js"></script>
+    <title>提现</title>
+</head>
+<style>
+    #withdraw {
+        width: 92%;
+        margin: 15px auto;
+        padding: 15px 0;
+        background-color: #fff;
+    }
+
+    .header {
+        width: 100%;
+        background-color: #fff;
+    }
+
+    .header p:nth-child(1) {
+        padding: 30px 0 0 15px;
+    }
+
+    .header p:nth-child(2) {
+        padding: 20px 0 30px 15px;
+        font-size: 3rem;
+    }
+
+    .header p:nth-child(3) {
+        height: 30px;
+        line-height: 30px;
+        text-indent: 15px;
+    }
+
+    #submit {
+        height: 35px;
+        line-height: 35px;
+        width: 85%;
+        margin: 10px auto;
+        border-radius: 5px;
+        color: #ffffff;
+    }
+
+    .setting {
+        margin-top: 15px;
+        font-size: .91rem;
+    }
+
+    input[type="number"] {
+        border: none;
+        padding: 10px 0 5px 40px;
+        font-weight: 600;
+        font-size: 2rem;
+    }
+
+    .amount {
+        padding: 10px 0 0 5px;
+        position: relative;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .amount > label {
+        padding: 10px 0 5px 12px;
+        font-size: 16px;
+    }
+
+    .tag {
+        position: absolute;
+        top: 45px;
+        left: 12px;
+        font-weight: 800;
+        font-size: 2rem
+    }
+
+    .notice {
+        padding: 10px 0 0 12px;
+    }
+
+    .total {
+        color: #0aa394;
+    }
+</style>
+
+<body>
+    <div id="withdraw">
+        <template>
+            <div class="header">
+                <div class="mui-input-row">
+                    <label>密码</label>
+                    <input type="password" class="mui-input-clear" placeholder="密码" v-model="password">
+                </div>
+                <div class="amount">
+                    <label>提现金额</label>
+                    <span class="tag">￥</span>
+                    <input type="number" class="mui-input-clear" v-model="amount">
+                </div>
+            </div>
+            <p class="notice" @click="total">最多可以提现 <span class="total">{{ totalAmount /100 | priceFilter }}</span> 元</p>
+            <div class="mui-button-row">
+                <div id="submit" @touchstart="back = '#05867a'" @touchend="back = '#0aa394'" :style="{backgroundColor:back}" @click="submit">确认</div>
+            </div>
+        </template>
+    </div>
+
+    <script>
+        var vm = new Vue({
+            el: '#withdraw',
+            data: {
+                totalAmount: '',
+                password: '',
+                amount: '',
+                back: '',
+                clickState: true
+            },
+            mounted() {
+                mui.plusReady();
+            },
+            methods: {
+                waithdraw() {
+                    let self = this
+                    mui.post(URL + 'Withdrawals',
+                        {
+                            pass: self.password,
+                            money: self.amount * 100
+                        }, 
+                        function (data) {
+                        plus.nativeUI.closeWaiting();
+                        console.log(JSON.stringify(data.data))
+                        plus.nativeUI.toast(data.data)
+                        if (data.error == 0) {
+                            let c = plus.webview.getWebviewById('wallet.html');
+                            mui.fire(c, 'refresh', {
+                                money: self.totalAmount - (self.amount * 100)
+                            });
+                            mui.back()
+                        }
+                    }) 
+                },
+                submit() {
+                    if (this.clickState == true) {
+                        this.clickState = false
+                        if (this.password != '' && this.amount != '') {
+                            plus.nativeUI.showWaiting()
+                            this.waithdraw()
+                        } else if (this.password == '') {
+                            plus.nativeUI.toast("请输入密码")
+                        } else if (this.amount == '') {
+                            plus.nativeUI.toast("请输入金额")
+                        }
+
+                        setTimeout(() => {
+                            this.clickState = true
+                        }, 1000);
+                    }
+                },
+                total() {
+                    this.amount = this.totalAmount / 100
+                }
+            },
+            filters: {
+                priceFilter(v) {
+                    return getFloatStr(v)
+                }
+            }
+        })
+
+        window.addEventListener('refresh', function (e) {
+            vm.totalAmount = e.detail.money
+        })
+
+        //重写返回逻辑
+        mui.back = function () {
+            plus.webview.currentWebview().close("slide-out-right", 200);
+        }
+    </script>
+</body>
+
+</html>

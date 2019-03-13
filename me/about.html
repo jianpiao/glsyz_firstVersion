@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="../static/fonts/left/iconfont.css" />
+    <link rel="stylesheet" href="../static/css/mui.min.css">
+    <title>关于</title>
+</head>
+
+<style type="text/css">
+    body {
+        margin: 0;
+        background-color: #ffffff;
+    }
+
+    header div:nth-child(1),
+    header div:nth-child(3) {
+        width: 15%;
+        text-align: center;
+    }
+
+    header div:nth-child(2) {
+        width: 70%;
+        text-align: left;
+    }
+
+    .mui-bar-nav.mui-bar .mui-icon {
+        margin: 0;
+    }
+
+    .main-view {
+        /* margin-top: 10%; */
+        width: 100%;
+        height: 400px;
+        /* overflow: hidden; */
+        /* border-bottom: 1px solid #eee; */
+    }
+
+    .view-info div {
+        text-align: center;
+    }
+
+    .view-info div:nth-child(1),
+    img {
+        /* width: 130px;
+        height: 130px; */
+        width: 100%;
+        height: 400px;
+        overflow: hidden;
+        margin: 0 auto 10px auto;
+    }
+
+    .view-info div:nth-child(2),
+    .view-info div:nth-child(3) {
+        height: 40px;
+        line-height: 40px;
+    }
+    
+    p {
+        position: absolute;
+        width: 100%;
+        top: 350px;
+        text-align: center;
+        color: #fff;
+        font-size: 1rem;
+        letter-spacing: 4px;
+    }
+</style>
+
+
+<body>
+    <div class="main-view">
+        <div class="view-info">
+            <div>
+                <img src="../img/m2.jpg" alt="小助手">
+            </div>
+            <p>广理商业街</p>
+            <div>
+                肇庆市睿客信息科技有限公司
+            </div>
+            <div>
+                V1.0
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script src="../static/js/mui.min.js"></script>
+
+<script>
+
+    window.onload = function () {
+        //从服务器获取数据  
+        // 今天销售情况
+
+        //业务数据获取完毕，并已插入当前页面DOM；  
+        //注意：若为ajax请求，则需将如下代码放在处理完ajax响应数据之后；  
+        mui.plusReady(function () {
+            //关闭等待框  
+            plus.nativeUI.closeWaiting();
+            //显示当前页面  
+            mui.currentWebview.show();
+            //	    mui.currentWebview.show('slide-in-right', 200); 
+        });
+    }
+
+
+
+    //重写返回逻辑
+    mui.back = function () {
+        plus.webview.currentWebview().close("slide-out-right", 200);
+    }
+
+</script>
